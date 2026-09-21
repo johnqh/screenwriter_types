@@ -33,3 +33,10 @@ export interface Workspace extends WorkspaceSummary {
 
 /** `GET /workspaces` item: summary plus the caller's role. */
 export type WorkspaceListItem = WorkspaceSummary & { role: Role };
+
+/** `GET /workspaces/:wid` */
+export type WorkspaceDetail = Workspace & {
+  role: Role;
+  memberCount: number;
+  storageBytes: number;
+};

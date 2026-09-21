@@ -129,10 +129,28 @@ export const documentListQuerySchema = z.object({
 });
 export type DocumentListQuery = z.infer<typeof documentListQuerySchema>;
 
+/** Style row in `DocumentDetail.template` (`code` = shortcut digit, `enter`/`tab` = next style ids). */
+export interface DocumentTemplateStyle {
+  id: string;
+  name: string;
+  code: number | null;
+  enter: string | null;
+  tab: string | null;
+}
+
+export interface DocumentTemplateInfo {
+  id: string;
+  version: number;
+  name: string;
+  layoutMode: 'flow' | 'panels';
+  styles: DocumentTemplateStyle[];
+}
+
 /** `GET /documents/:did` (metadata plus live-state facts, no content). */
 export interface DocumentDetail extends DocumentMeta {
   role: Role;
   schemaVersion: number;
+  template: DocumentTemplateInfo | null;
 }
 
 // ─── Trash ──────────────────────────────────────────────────────────────────
