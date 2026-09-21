@@ -43,6 +43,8 @@ export const SYNC_CLOSE_CODES = {
   ACCOUNT_DISABLED_OR_DEVICE_REVOKED: 4403,
   PROTOCOL_UNSUPPORTED: 4406,
   HEARTBEAT_TIMEOUT: 4408,
+  /** Document epoch changed (snapshot open / version restore): resubscribe at the new epoch. */
+  EPOCH_CHANGED: 4409,
   FRAME_TOO_LARGE: 4413,
   RATE_LIMITED: 4429,
 } as const;
