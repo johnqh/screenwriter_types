@@ -137,6 +137,11 @@ export const API_ROUTES = {
   scene: r('GET', '/documents/:did/scenes/:sceneId', 'U,Kr,L', 'document.read'),
   scenesBatch: r('POST', '/documents/:did/scenes/batch', 'U,Kr,L', 'document.read'),
   elementsBatch: r('POST', '/documents/:did/elements/batch', 'U,Kr,L', 'document.read'),
+  // B6 personal API keys (user principals only; a key gets 403 API_KEY_FORBIDDEN)
+  apiKeysList: r('GET', '/api-keys', 'U'),
+  apiKeyCreate: r('POST', '/api-keys', 'U', 'apiKeys.use'),
+  apiKeyUpdate: r('PATCH', '/api-keys/:kid', 'U'),
+  apiKeyRevoke: r('DELETE', '/api-keys/:kid', 'U'),
 } as const satisfies Record<string, RouteSpec>;
 
 export type ApiRouteName = keyof typeof API_ROUTES;

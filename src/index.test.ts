@@ -3,6 +3,9 @@ import {
   API_ERROR_CODES,
   ERROR_STATUS,
   API_ROUTES,
+  API_KEY_FORMAT_RE,
+  apiKeyCreateSchema,
+  apiKeyUpdateSchema,
   SYNC_CLOSE_CODES,
   SYNC_MESSAGE_TYPES,
   commandBatchRequestSchema,
@@ -234,5 +237,23 @@ describe('routes and fixtures', () => {
     expect(makeProject({ name: 'X' }).name).toBe('X');
     expect(makeDocumentMeta().epoch).toBe(0);
     expect(makeSnapshotSummary().kind).toBe('manual');
+  });
+});
+
+describe('api keys', () => {
+  it('create schema defaults ai and bounds name and expiry', () => {
+    const ok = apiKeyCreateSchema.parse({ name: 'n', workspaceId: 'ws_x', scope: 'read' });
+    expect(ok.ai).toBe(false);
+    expect(apiKeyCreateSchema.safeParse({ name: '', workspaceId: 'ws_x', scope: 'read' }).success).toBe(false);
+    expect(apiKeyCreateSchema.safeParse({ name: 'n', workspaceId: 'ws_x', scope: 'admin' }).success).toBe(false);
+    expect(apiKeyCreateSchema.safeParse({ name: 'n', workspaceId: 'ws_x', scope: 'read', expiresInDays: 366 }).success).toBe(false);
+    expect(apiKeyCreateSchema.safeParse({ name: 'n', workspaceId: 'ws_x', scope: 'read', expiresInDays: 0 }).success).toBe(false);
+    expect(apiKeyUpdateSchema.safeParse({ ai: true }).success).toBe(true);
+  });
+  it('key format and routes', () => {
+    expect(API_KEY_FORMAT_RE.test('fwk_a1b2c3d4_' + 'A'.repeat(43))).toBe(true);
+    expect(API_KEY_FORMAT_RE.test('fwk_a1b2c3d4_short')).toBe(false);
+    expect(API_ROUTES.apiKeyRevoke.method).toBe('DELETE');
+    expect(API_ROUTES.apiKeyUpdate.path).toBe('/api-keys/:kid');
   });
 });
