@@ -211,6 +211,7 @@ describe('import and export', () => {
     expect(API_ROUTES.documentImport.path).toBe('/projects/:pid/documents/import');
     expect(API_ROUTES.documentExport.method).toBe('POST');
     expect(API_ROUTES.formatsList.path).toBe('/formats');
+    expect(API_ROUTES.aiStatus.path).toBe('/ai/status');
     expect(ERROR_STATUS.UNSUPPORTED_FORMAT).toBe(400);
     expect(ERROR_STATUS.IMPORT_FAILED).toBe(400);
     expect(ERROR_STATUS.IMPORT_INVALID).toBe(422);

@@ -278,3 +278,14 @@ export interface SuggestionAcceptResponse {
   applied: string[];
   set: SuggestionSet;
 }
+
+// ---- Availability ----
+
+/** `fixture` = canned test-mode answers (AI_TEST_MODE=1); `live` = ShapeShyft configured; `unavailable` = neither. */
+export type AiStatusMode = 'live' | 'fixture' | 'unavailable';
+
+/** `GET /ai/status`. */
+export interface AiStatus {
+  available: boolean;
+  mode: AiStatusMode;
+}

@@ -144,6 +144,7 @@ export const API_ROUTES = {
   apiKeyRevoke: r('DELETE', '/api-keys/:kid', 'U'),
   // B7 AI: script review and polish. Keys need the `ai` flag (403 AI_KEY_NOT_PERMITTED) and, to start
   // jobs or decide suggestions, read_write scope.
+  aiStatus: r('GET', '/ai/status', 'U,Kr'),
   aiJobCreate: r('POST', '/documents/:did/ai/jobs', 'U,Krw', 'ai.run'),
   aiJobsList: r('GET', '/documents/:did/ai/jobs', 'U,Kr', 'ai.review'),
   aiJobGet: r('GET', '/ai/jobs/:jobId', 'U,Kr', 'ai.review'),
