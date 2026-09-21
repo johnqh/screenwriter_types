@@ -8,6 +8,7 @@ import {
   commandBatchRequestSchema,
   cursorQuerySchema,
   documentCreateSchema,
+  documentImportSchema,
   errorResponse,
   isId,
   meUpdateSchema,
@@ -197,6 +198,22 @@ describe('sync frames', () => {
         .success
     ).toBe(false);
     expect(SYNC_CLOSE_CODES.PROTOCOL_UNSUPPORTED).toBe(4406);
+  });
+});
+
+describe('import and export', () => {
+  it('routes, error codes and import schema', () => {
+    expect(API_ROUTES.documentImport.path).toBe('/projects/:pid/documents/import');
+    expect(API_ROUTES.documentExport.method).toBe('POST');
+    expect(API_ROUTES.formatsList.path).toBe('/formats');
+    expect(ERROR_STATUS.UNSUPPORTED_FORMAT).toBe(400);
+    expect(ERROR_STATUS.IMPORT_FAILED).toBe(400);
+    expect(ERROR_STATUS.IMPORT_INVALID).toBe(422);
+    expect(ERROR_STATUS.IMPORT_TOO_LARGE).toBe(413);
+    expect(
+      documentImportSchema.safeParse({ filename: 'a.fdx', contentB64: 'AA==' }).success
+    ).toBe(true);
+    expect(documentImportSchema.safeParse({ contentB64: 'AA==' }).success).toBe(false);
   });
 });
 

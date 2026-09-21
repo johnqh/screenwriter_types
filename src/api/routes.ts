@@ -122,6 +122,15 @@ export const API_ROUTES = {
   ),
   snapshotOpen: r('POST', '/snapshots/:sid/open', 'U,Krw', 'snapshot.open'),
   snapshotFork: r('POST', '/snapshots/:sid/fork', 'U,Krw', 'snapshot.read'),
+  // Import and export (synchronous, no jobs)
+  documentImport: r(
+    'POST',
+    '/projects/:pid/documents/import',
+    'U,Krw',
+    'document.create'
+  ),
+  documentExport: r('POST', '/documents/:did/export', 'U,Kr', 'document.read'),
+  formatsList: r('GET', '/formats', 'U,Kr'),
   // B5 commands and reads
   commands: r('POST', '/documents/:did/commands', 'U,Krw', 'document.edit'),
   outline: r('GET', '/documents/:did/outline', 'U,Kr,L', 'document.read'),
