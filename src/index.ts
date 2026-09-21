@@ -14,3 +14,4 @@ export * from './templates/index.js';
 export * from './versions/index.js';
 export * from './commands/index.js';
 export * from './sync/index.js';
+export * from './sync/codec.js';
