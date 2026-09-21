@@ -142,6 +142,16 @@ export const API_ROUTES = {
   apiKeyCreate: r('POST', '/api-keys', 'U', 'apiKeys.use'),
   apiKeyUpdate: r('PATCH', '/api-keys/:kid', 'U'),
   apiKeyRevoke: r('DELETE', '/api-keys/:kid', 'U'),
+  // B7 AI: script review and polish. Keys need the `ai` flag (403 AI_KEY_NOT_PERMITTED) and, to start
+  // jobs or decide suggestions, read_write scope.
+  aiJobCreate: r('POST', '/documents/:did/ai/jobs', 'U,Krw', 'ai.run'),
+  aiJobsList: r('GET', '/documents/:did/ai/jobs', 'U,Kr', 'ai.review'),
+  aiJobGet: r('GET', '/ai/jobs/:jobId', 'U,Kr', 'ai.review'),
+  aiJobCancel: r('POST', '/ai/jobs/:jobId/cancel', 'U,Krw', 'ai.run'),
+  aiSuggestionSetsList: r('GET', '/documents/:did/ai/suggestion-sets', 'U,Kr', 'ai.review'),
+  aiSuggestionSetGet: r('GET', '/ai/suggestion-sets/:ssid', 'U,Kr', 'ai.review'),
+  aiSuggestionSetAccept: r('POST', '/ai/suggestion-sets/:ssid/accept', 'U,Krw', 'ai.run'),
+  aiSuggestionSetReject: r('POST', '/ai/suggestion-sets/:ssid/reject', 'U,Krw', 'ai.run'),
 } as const satisfies Record<string, RouteSpec>;
 
 export type ApiRouteName = keyof typeof API_ROUTES;

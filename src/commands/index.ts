@@ -79,6 +79,8 @@ export interface ElementRead {
   id: string;
   styleId: string;
   styleName: string;
+  /** The style's role (`sceneHeading`, `action`, `character`, `dialogue`, ...), for callers that must not guess from names. */
+  styleRole?: string;
   text: string;
   contentHash: string;
 }

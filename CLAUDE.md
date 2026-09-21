@@ -11,6 +11,7 @@ TypeScript, Zod v4, Vitest, Bun. Depends on `@sudobility/writing_core` for ids, 
 - `src/api/` envelope (`successResponse`, `errorResponse`, `API_ERROR_CODES`, `ERROR_STATUS`, `Paginated`), `cursorQuerySchema`, `API_ROUTES`
 - `src/ids/` re-exports from writing_core
 - `src/tenancy/`, `projects/`, `me/`, `templates/`, `versions/`, `commands/` DTOs and request schemas
+- `src/ai/` spec 06 AI: `AI_TASKS`, `AI_LIMITS`, model-output Zod schemas per ShapeShyft endpoint (`AI_ENDPOINT_OUTPUT_SCHEMAS`, all-required and closed so `z.toJSONSchema` gives the stored endpoint schema), `CoverageReport`, job and suggestion-set DTOs
 - `src/sync/` spec 03 frame schemas, message codes, close codes
 - `src/test/` fixture factories (`makeWorkspace`, `makeProject`, `makeDocumentMeta`, `makeSnapshotSummary`)
 - `src/index.ts` the barrel
