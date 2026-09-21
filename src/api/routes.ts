@@ -135,6 +135,8 @@ export const API_ROUTES = {
   commands: r('POST', '/documents/:did/commands', 'U,Krw', 'document.edit'),
   outline: r('GET', '/documents/:did/outline', 'U,Kr,L', 'document.read'),
   scene: r('GET', '/documents/:did/scenes/:sceneId', 'U,Kr,L', 'document.read'),
+  scenesBatch: r('POST', '/documents/:did/scenes/batch', 'U,Kr,L', 'document.read'),
+  elementsBatch: r('POST', '/documents/:did/elements/batch', 'U,Kr,L', 'document.read'),
 } as const satisfies Record<string, RouteSpec>;
 
 export type ApiRouteName = keyof typeof API_ROUTES;

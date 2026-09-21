@@ -9,6 +9,8 @@ import {
   cursorQuerySchema,
   documentCreateSchema,
   documentImportSchema,
+  elementsBatchRequestSchema,
+  scenesBatchRequestSchema,
   errorResponse,
   isId,
   meUpdateSchema,
@@ -220,6 +222,11 @@ describe('import and export', () => {
 describe('routes and fixtures', () => {
   it('route table has entries', () => {
     expect(API_ROUTES.commands.method).toBe('POST');
+    expect(API_ROUTES.scenesBatch.path).toBe('/documents/:did/scenes/batch');
+    expect(API_ROUTES.elementsBatch.path).toBe('/documents/:did/elements/batch');
+    expect(elementsBatchRequestSchema.safeParse({ elementIds: Array(501).fill('el_x') }).success).toBe(false);
+    expect(scenesBatchRequestSchema.safeParse({ sceneIds: ['el_x'] }).success).toBe(true);
+    expect(scenesBatchRequestSchema.safeParse({ sceneIds: Array(21).fill('el_x') }).success).toBe(false);
     expect(Object.keys(API_ROUTES).length).toBeGreaterThan(30);
   });
   it('fixtures build', () => {
