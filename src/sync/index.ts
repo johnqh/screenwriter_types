@@ -105,6 +105,8 @@ export const authPayloadSchema = z.object({
   installId: z.string(),
   clientVersion: z.string(),
   schemaVersion: uint,
+  /** Unlock-session token (`POST /documents/:did/unlock-session`) for opening locked documents. */
+  unlockToken: z.string().optional(),
 });
 export const authOkPayloadSchema = z.object({
   userId: z.string(),
@@ -276,3 +278,5 @@ export type SyncFrameOf<T extends SyncFrame['type']> = Extract<
   SyncFrame,
   { type: T }
 >;
+
+export * from './permissions.js';
