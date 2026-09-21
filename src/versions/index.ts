@@ -134,3 +134,23 @@ export const sourceRefSchema = z.discriminatedUnion('kind', [
     versionId: z.string(),
   }),
 ]);
+
+/** `POST /documents/:did/versions/:vid/snapshot` body. */
+export interface VersionSnapshotRequest {
+  name: string;
+  note?: string;
+}
+
+/** `POST /documents/:did/versions/:vid/restore` (bumps the epoch). */
+export interface VersionRestoreResponse {
+  document: import('../projects/index.js').DocumentMeta;
+  epoch: number;
+  preRestoreSnapshot: SnapshotSummary;
+}
+
+/** `POST /snapshots/:sid/open` (bumps the epoch). */
+export interface SnapshotOpenResponse {
+  document: import('../projects/index.js').DocumentMeta;
+  epoch: number;
+  preOpenSnapshot: SnapshotSummary;
+}

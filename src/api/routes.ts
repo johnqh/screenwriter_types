@@ -82,6 +82,24 @@ export const API_ROUTES = {
   sync: r('GET', '/sync', 'P'),
   // B4 versions and snapshots
   versionsList: r('GET', '/documents/:did/versions', 'U,Kr,L', 'document.read'),
+  versionState: r(
+    'GET',
+    '/documents/:did/versions/:vid/state',
+    'U,Kr,L',
+    'document.read'
+  ),
+  versionRestore: r(
+    'POST',
+    '/documents/:did/versions/:vid/restore',
+    'U,Krw',
+    'document.restore'
+  ),
+  versionSnapshot: r(
+    'POST',
+    '/documents/:did/versions/:vid/snapshot',
+    'U,Krw',
+    'snapshot.create'
+  ),
   snapshotsList: r(
     'GET',
     '/documents/:did/snapshots',
