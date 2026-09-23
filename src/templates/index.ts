@@ -16,13 +16,22 @@ export interface TemplateSummary {
   latestVersion: number;
   /** A first-page thumbnail was rendered (`template.thumbnail` job). Built-ins use static assets, so this is false for them. */
   hasThumbnail: boolean;
+  /**
+   * BCP-47 (writing_core's `TemplateJSON.locale`), set only for `scope: 'builtin'` — the catalogue's language
+   * variants (screenplay-standard, tv-one-hour, ...) each carry one. `user`/`workspace` templates have no locale
+   * concept (they're the caller's own authored content, not language variants of a catalog) and never set this.
+   */
+  locale?: string;
 }
 
-/** `GET /templates` query: user templates always; `workspaceId` adds that workspace's; `scope` narrows. */
+/** `GET /templates` query: user templates always; `workspaceId` adds that workspace's; `scope` narrows.
+ * `locale` filters built-ins to one BCP-47 language (e.g. the app's current UI language); user/workspace templates
+ * are never filtered by it, since they have no locale of their own. */
 export const templateListQuerySchema = z.object({
   category: z.string().optional(),
   workspaceId: z.string().optional(),
   scope: z.enum(['builtin', 'user', 'workspace']).optional(),
+  locale: z.string().optional(),
 });
 export type TemplateListQuery = z.infer<typeof templateListQuerySchema>;
 
