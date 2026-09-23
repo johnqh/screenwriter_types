@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { cursorQuerySchema } from '../api/pagination';
-import { JOB_STATUSES } from '../jobs/index';
+import { cursorQuerySchema } from '../api/pagination.js';
+import { JOB_STATUSES } from '../jobs/index.js';
 
 /**
  * Admin routes (spec 05 §6.23): `/api/v1/admin/*` requires `siteAdmin` on a user principal (never an API key).
