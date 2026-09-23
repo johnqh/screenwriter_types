@@ -24,6 +24,8 @@ export interface Me {
   siteAdmin: boolean;
   personalWorkspaceId: string;
   createdAt: string;
+  /** Set while an account deletion is scheduled (`DELETE /me`); `POST /me/restore` clears it. */
+  deletionScheduledFor?: string | null;
 }
 
 export const meUpdateSchema = z.object({

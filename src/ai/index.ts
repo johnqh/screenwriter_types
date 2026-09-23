@@ -14,10 +14,20 @@ export type AiTask = (typeof AI_TASKS)[number];
 export const aiTaskSchema = z.enum(AI_TASKS);
 
 /** ShapeShyft endpoint names (spec 06 2.1). `summarize-chunk` is stage 1 of a long coverage run. */
-export const AI_ENDPOINTS = ['coverage-review', 'polish', 'summarize-chunk'] as const;
+export const AI_ENDPOINTS = [
+  'coverage-review',
+  'polish',
+  'summarize-chunk',
+] as const;
 export type AiEndpoint = (typeof AI_ENDPOINTS)[number];
 
-export const AI_JOB_STATUSES = ['queued', 'running', 'succeeded', 'failed', 'cancelled'] as const;
+export const AI_JOB_STATUSES = [
+  'queued',
+  'running',
+  'succeeded',
+  'failed',
+  'cancelled',
+] as const;
 export type AiJobStatus = (typeof AI_JOB_STATUSES)[number];
 
 /** Counted limits, declared once: schemas, validators and prompt text all read these. */
@@ -42,8 +52,18 @@ export const AI_LIMITS = {
 } as const;
 
 export const REVIEW_CATEGORIES = [
-  'premise', 'structure', 'character', 'dialogue', 'pacing', 'tone',
-  'theme', 'worldbuilding', 'format', 'marketability', 'clarity', 'continuity',
+  'premise',
+  'structure',
+  'character',
+  'dialogue',
+  'pacing',
+  'tone',
+  'theme',
+  'worldbuilding',
+  'format',
+  'marketability',
+  'clarity',
+  'continuity',
 ] as const;
 export type ReviewCategory = (typeof REVIEW_CATEGORIES)[number];
 export const SEVERITIES = ['praise', 'minor', 'moderate', 'major'] as const;
@@ -207,7 +227,12 @@ export interface AiJobError {
 export type AiJobResult =
   | { kind: 'report'; report: CoverageReport }
   /** `suggestionSetId` is null when the model found nothing worth changing (count 0). */
-  | { kind: 'suggestions'; suggestionSetId: string | null; count: number; droppedItems: number };
+  | {
+      kind: 'suggestions';
+      suggestionSetId: string | null;
+      count: number;
+      droppedItems: number;
+    };
 
 /** `GET /ai/jobs/:jobId` and the items of `GET /documents/:did/ai/jobs`. Poll until `status` is final. */
 export interface AiJob {
@@ -227,10 +252,20 @@ export interface AiJob {
 
 // ---- Suggestion sets (spec 06 7) ----
 
-export const SUGGESTION_STATUSES = ['pending', 'accepted', 'rejected', 'stale'] as const;
+export const SUGGESTION_STATUSES = [
+  'pending',
+  'accepted',
+  'rejected',
+  'stale',
+] as const;
 export type SuggestionStatus = (typeof SUGGESTION_STATUSES)[number];
 export const SUGGESTION_SET_STATUSES = [
-  'pending', 'partiallyAccepted', 'accepted', 'rejected', 'stale', 'expired',
+  'pending',
+  'partiallyAccepted',
+  'accepted',
+  'rejected',
+  'stale',
+  'expired',
 ] as const;
 export type SuggestionSetStatus = (typeof SUGGESTION_SET_STATUSES)[number];
 
@@ -288,4 +323,104 @@ export type AiStatusMode = 'live' | 'fixture' | 'unavailable';
 export interface AiStatus {
   available: boolean;
   mode: AiStatusMode;
+}
+
+// ---- Consent (spec 06 §9.3: gate 3) ----
+
+/** Bumping this requires every user to re-accept before their next AI job. */
+export const AI_CONSENT_VERSION = 1;
+
+/** `GET /me/ai-consents`. */
+export interface AiConsentStatus {
+  currentVersion: number;
+  acceptedVersion: number | null;
+  acceptedAt: string | null;
+}
+
+/** `POST /me/ai-consents`: `version` must equal `AI_CONSENT_VERSION`, else `VALIDATION`. */
+export const aiConsentAcceptSchema = z.object({ version: z.number().int() });
+export type AiConsentAcceptRequest = z.infer<typeof aiConsentAcceptSchema>;
+
+export interface AiConsentAcceptResponse {
+  acceptedVersion: number;
+  acceptedAt: string;
+}
+
+// ---- Estimate and pricing (spec 06 §10.1, §10.3) ----
+
+/** What a quote was computed from. Pages are approximated from word count until the paginator runs server-side (M2). */
+export interface AiPriceBasis {
+  pages: number;
+  scopePages?: number;
+}
+
+export const aiEstimateRequestSchema = z.object({
+  task: aiTaskSchema,
+  scope: z
+    .object({
+      sceneIds: z.array(z.string()).optional(),
+      elementIds: z.array(z.string()).optional(),
+    })
+    .optional(),
+  options: z.record(z.string(), z.unknown()).optional(),
+});
+export type AiEstimateRequest = z.infer<typeof aiEstimateRequestSchema>;
+
+/** `POST /documents/:did/ai/estimate`: the same pricing function `startJob` charges at, run without creating a job. */
+export interface AiEstimateResponse {
+  credits: number;
+  basis: AiPriceBasis;
+  withinLimit: boolean;
+  balance: number;
+}
+
+// ---- Activity (spec 05 §6.3) ----
+
+/** `GET /me/ai-activity`, `GET /workspaces/:wid/ai-activity` (the latter adds `userId`). */
+export interface AiActivityItem {
+  jobId: string;
+  task: AiTask;
+  documentId: string;
+  documentTitle: string;
+  status: AiJobStatus;
+  quotedCredits: number | null;
+  chargedCredits: number | null;
+  refundedCredits: number | null;
+  createdAt: string;
+}
+
+// ---- Reports (spec 06 §11) ----
+
+/** `GET /documents/:did/ai/reports`: a saved coverage/review job, summarised. */
+export interface AiReportSummary {
+  jobId: string;
+  task: AiTask;
+  status: AiJobStatus;
+  createdAt: string;
+  finishedAt: string | null;
+}
+
+/** `POST .../reports/:jobId/notes/:noteId/convert`: `noteId` is `"strengths:<i>" | "weaknesses:<i>" | "sceneNotes:<i>"`,
+ *  the note's position in the immutable stored report (reports have no independently stable note ids). */
+export interface AiNoteConvertResponse {
+  scriptNoteId: string;
+}
+
+// ---- Suggestion decide (spec 06 §7.4): a combined, server-side accept/reject for API/MCP callers ----
+
+export const suggestionDecideSchema = z.object({
+  accept: z.union([z.array(z.string().min(1)), z.literal('allPending')]),
+  reject: z.union([z.array(z.string().min(1)), z.literal('allPending')]),
+  expectedHashes: z.record(z.string(), z.string()).optional(),
+  dryRun: z.boolean().optional(),
+});
+export type SuggestionDecideRequest = z.infer<typeof suggestionDecideSchema>;
+
+export interface SuggestionDecideResponse {
+  accepted: string[];
+  rejected: string[];
+  skippedStale: string[];
+  skippedConflicted: string[];
+  autoSnapshotId: string | null;
+  epoch: number;
 }

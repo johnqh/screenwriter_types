@@ -10,6 +10,18 @@ export const documentKindSchema = z.enum(DOCUMENT_KINDS);
 
 export const SORT_OPTIONS = ['updated', 'name', 'created'] as const;
 
+/** Spec 05 §6.26: a `series` project orders its episodes by `(season, episode)` (F-COL-006). */
+export const PROJECT_KINDS = ['feature', 'series', 'play', 'other'] as const;
+export type ProjectKind = (typeof PROJECT_KINDS)[number];
+export const projectKindSchema = z.enum(PROJECT_KINDS);
+
+/** Document labels (F-COL-006): at most 20 per document, each 1-40 characters. */
+export const DOCUMENT_LABELS_MAX = 20;
+export const DOCUMENT_LABEL_MAX_CHARS = 40;
+export const documentLabelsSchema = z
+  .array(z.string().trim().min(1).max(DOCUMENT_LABEL_MAX_CHARS))
+  .max(DOCUMENT_LABELS_MAX);
+
 // ─── Projects (spec 05 §6.6) ────────────────────────────────────────────────
 
 export interface ProjectSummary {
@@ -19,6 +31,8 @@ export interface ProjectSummary {
   description: string | null;
   color: string | null;
   coverAssetId: string | null;
+  kind: ProjectKind;
+  logline: string | null;
   documentCount: number;
   createdAt: string;
   updatedAt: string;
@@ -34,6 +48,10 @@ export interface DocumentMeta {
   title: string;
   logline: string | null;
   color: string | null;
+  labels: string[];
+  /** Series projects: episodes order by `(season, episode)`. */
+  season: number | null;
+  episode: number | null;
   position: number;
   language: string;
   templateId: string | null;
@@ -72,6 +90,8 @@ export const projectCreateSchema = z.object({
   description: z.string().max(2000).optional(),
   coverAssetId: z.string().optional(),
   color: z.string().max(32).optional(),
+  kind: projectKindSchema.optional(),
+  logline: z.string().max(2000).optional(),
 });
 export type ProjectCreateRequest = z.infer<typeof projectCreateSchema>;
 
@@ -80,6 +100,8 @@ export const projectUpdateSchema = z.object({
   description: z.string().max(2000).nullable().optional(),
   coverAssetId: z.string().nullable().optional(),
   color: z.string().max(32).nullable().optional(),
+  kind: projectKindSchema.optional(),
+  logline: z.string().max(2000).nullable().optional(),
   workspaceId: z.string().optional(),
 });
 export type ProjectUpdateRequest = z.infer<typeof projectUpdateSchema>;
@@ -105,6 +127,9 @@ export const documentCreateSchema = z.object({
   templateId: z.string().optional(),
   templateVersion: z.number().int().positive().optional(),
   language: z.string().max(16).optional(),
+  labels: documentLabelsSchema.optional(),
+  season: z.number().int().min(0).max(9999).optional(),
+  episode: z.number().int().min(0).max(99999).optional(),
 });
 export type DocumentCreateRequest = z.infer<typeof documentCreateSchema>;
 
@@ -116,6 +141,9 @@ export const documentUpdateSchema = z.object({
   language: z.string().max(16).optional(),
   logline: z.string().max(2000).nullable().optional(),
   excludeFromAi: z.boolean().optional(),
+  labels: documentLabelsSchema.optional(),
+  season: z.number().int().min(0).max(9999).nullable().optional(),
+  episode: z.number().int().min(0).max(99999).nullable().optional(),
 });
 export type DocumentUpdateRequest = z.infer<typeof documentUpdateSchema>;
 
@@ -126,6 +154,8 @@ export const documentListQuerySchema = z.object({
     .optional(),
   folderId: z.string().optional(),
   kind: documentKindSchema.optional(),
+  /** `episode` = `(season, episode)` with unnumbered documents last; the default for a `series` project. */
+  order: z.enum(['position', 'episode']).optional(),
 });
 export type DocumentListQuery = z.infer<typeof documentListQuerySchema>;
 

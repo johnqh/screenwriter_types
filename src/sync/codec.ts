@@ -18,7 +18,11 @@
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import * as string from 'lib0/string';
-import { SYNC_MESSAGE_TYPES, syncFrameSchema, type SyncFrame } from './index.js';
+import {
+  SYNC_MESSAGE_TYPES,
+  syncFrameSchema,
+  type SyncFrame,
+} from './index.js';
 
 export class SyncCodecError extends Error {
   constructor(message: string) {
@@ -32,7 +36,8 @@ const BINARY_TYPES = new Set(['syncStep1', 'syncStep2', 'awareness']);
 const NAME_BY_CODE = new Map<number, SyncFrame['type']>();
 for (const [name, code] of Object.entries(SYNC_MESSAGE_TYPES)) {
   // ping and pong share a code: the first registration (ping) wins on decode.
-  if (!NAME_BY_CODE.has(code)) NAME_BY_CODE.set(code, name as SyncFrame['type']);
+  if (!NAME_BY_CODE.has(code))
+    NAME_BY_CODE.set(code, name as SyncFrame['type']);
 }
 
 export function encodeFrame(frame: SyncFrame): Uint8Array {
@@ -46,7 +51,10 @@ export function encodeFrame(frame: SyncFrame): Uint8Array {
     encoding.writeVarUint(enc, frame.payload.clientSeq);
     encoding.writeVarUint8Array(enc, frame.payload.update);
   } else {
-    encoding.writeUint8Array(enc, string.encodeUtf8(JSON.stringify(frame.payload)));
+    encoding.writeUint8Array(
+      enc,
+      string.encodeUtf8(JSON.stringify(frame.payload))
+    );
   }
   return encoding.toUint8Array(enc);
 }
@@ -77,9 +85,12 @@ export function decodeFrame(bytes: Uint8Array): SyncFrame {
     candidate = { channelId, type, payload };
   } catch (e) {
     if (e instanceof SyncCodecError) throw e;
-    throw new SyncCodecError(`malformed frame: ${e instanceof Error ? e.message : String(e)}`);
+    throw new SyncCodecError(
+      `malformed frame: ${e instanceof Error ? e.message : String(e)}`
+    );
   }
   const parsed = syncFrameSchema.safeParse(candidate);
-  if (!parsed.success) throw new SyncCodecError(`invalid frame: ${parsed.error.message}`);
+  if (!parsed.success)
+    throw new SyncCodecError(`invalid frame: ${parsed.error.message}`);
   return parsed.data;
 }

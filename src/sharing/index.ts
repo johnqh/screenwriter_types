@@ -20,6 +20,7 @@ export const workspaceUpdateSchema = z.object({
   defaultTemplateId: z.string().min(1).nullable().optional(),
   defaultLanguage: z.string().min(2).max(35).optional(),
   aiEnabled: z.boolean().optional(),
+  allowPublicLinks: z.boolean().optional(),
 });
 export type WorkspaceUpdateRequest = z.infer<typeof workspaceUpdateSchema>;
 
@@ -30,7 +31,9 @@ export interface WorkspaceDeleteResponse {
   deletedAt: string;
 }
 
-export const workspaceTransferSchema = z.object({ toUserId: z.string().min(1) });
+export const workspaceTransferSchema = z.object({
+  toUserId: z.string().min(1),
+});
 export type WorkspaceTransferRequest = z.infer<typeof workspaceTransferSchema>;
 
 /** `GET /workspaces/:wid/audit.csv` query: an ISO-8601 range of at most one year. */
@@ -39,7 +42,14 @@ export const workspaceAuditQuerySchema = z.object({
   to: z.iso.datetime({ offset: true }).optional(),
 });
 export type WorkspaceAuditQuery = z.infer<typeof workspaceAuditQuerySchema>;
-export const AUDIT_CSV_COLUMNS = ['created_at', 'actor', 'action', 'target_type', 'target_id', 'ip'] as const;
+export const AUDIT_CSV_COLUMNS = [
+  'created_at',
+  'actor',
+  'action',
+  'target_type',
+  'target_id',
+  'ip',
+] as const;
 export const AUDIT_MAX_RANGE_DAYS = 366;
 
 export interface WorkspaceUsage {
@@ -68,7 +78,13 @@ export type MemberUpdateRequest = z.infer<typeof memberUpdateSchema>;
 export const INVITATION_TARGETS = ['workspace', 'project', 'document'] as const;
 export type InvitationTarget = (typeof INVITATION_TARGETS)[number];
 export const INVITATION_TTL_DAYS = 14;
-export const INVITATION_STATUSES = ['pending', 'accepted', 'declined', 'cancelled', 'expired'] as const;
+export const INVITATION_STATUSES = [
+  'pending',
+  'accepted',
+  'declined',
+  'cancelled',
+  'expired',
+] as const;
 export type InvitationStatus = (typeof INVITATION_STATUSES)[number];
 
 /** `role` for a workspace invitation is `admin|writer|commenter|viewer` (never `owner`); for a project or document it is a grant role. */
@@ -177,7 +193,7 @@ export const shareLinkUpdateSchema = z
     allowDownload: z.boolean().optional(),
     watermarkText: z.string().max(200).nullable().optional(),
   })
-  .refine(v => !(v.password !== undefined && v.clearPassword), {
+  .refine((v) => !(v.password !== undefined && v.clearPassword), {
     message: 'password and clearPassword are exclusive',
   });
 export type ShareLinkUpdateRequest = z.infer<typeof shareLinkUpdateSchema>;
@@ -221,7 +237,9 @@ export interface PublicShareInfo {
   allowDownload: boolean;
 }
 
-export const shareUnlockSchema = z.object({ password: z.string().max(200).optional() });
+export const shareUnlockSchema = z.object({
+  password: z.string().max(200).optional(),
+});
 export type ShareUnlockRequest = z.infer<typeof shareUnlockSchema>;
 /** Also the way to obtain (and renew) a session for a password-less link. Send `linkSession` as `Authorization: Bearer` on `/share/:token/*` and as the sync `link` auth token. */
 export interface ShareUnlockResponse {

@@ -27,6 +27,8 @@ export interface Workspace extends WorkspaceSummary {
   defaultTemplateId: string | null;
   defaultLanguage: string;
   aiEnabled: boolean;
+  /** F-SET-009: false disables every existing `anyone with the link` share link of the workspace and refuses new ones. */
+  allowPublicLinks: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -106,7 +108,13 @@ export type Permission = keyof typeof PERMISSION_MIN_ROLE;
 export const PERMISSIONS = Object.keys(PERMISSION_MIN_ROLE) as Permission[];
 
 /** 0 = owner ... 4 = viewer; a smaller number is more authority. */
-const RANK: Record<Role, number> = { owner: 0, admin: 1, writer: 2, commenter: 3, viewer: 4 };
+const RANK: Record<Role, number> = {
+  owner: 0,
+  admin: 1,
+  writer: 2,
+  commenter: 3,
+  viewer: 4,
+};
 
 /** True when `a` has at least the authority of `b`. */
 export const roleAtLeast = (a: Role, b: Role): boolean => RANK[a] <= RANK[b];
@@ -114,26 +122,29 @@ export const roleAtLeast = (a: Role, b: Role): boolean => RANK[a] <= RANK[b];
 /** The higher-authority of the given roles (nulls ignored); null when there are none. */
 export function maxRole(...roles: (Role | null | undefined)[]): Role | null {
   let best: Role | null = null;
-  for (const r of roles) if (r && (best === null || RANK[r] < RANK[best])) best = r;
+  for (const r of roles)
+    if (r && (best === null || RANK[r] < RANK[best])) best = r;
   return best;
 }
 
 /** The lower-authority of two roles (used to cap an API key by its scope). */
 export const minRole = (a: Role, b: Role): Role => (RANK[a] >= RANK[b] ? a : b);
 
-export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = Object.fromEntries(
-  ROLES.map(role => [
-    role,
-    PERMISSIONS.filter(p => roleAtLeast(role, PERMISSION_MIN_ROLE[p])),
-  ])
-) as unknown as Record<Role, readonly Permission[]>;
+export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> =
+  Object.fromEntries(
+    ROLES.map((role) => [
+      role,
+      PERMISSIONS.filter((p) => roleAtLeast(role, PERMISSION_MIN_ROLE[p])),
+    ])
+  ) as unknown as Record<Role, readonly Permission[]>;
 
 /** The only check routes call. */
 export const hasPermission = (role: Role, permission: Permission): boolean =>
   roleAtLeast(role, PERMISSION_MIN_ROLE[permission]);
 
 /** Lowest role that holds `permission` (goes in a 403's `details.requiredRole`). */
-export const requiredRoleFor = (permission: Permission): Role => PERMISSION_MIN_ROLE[permission];
+export const requiredRoleFor = (permission: Permission): Role =>
+  PERMISSION_MIN_ROLE[permission];
 
 /** Roles a share grant or a project/document invitation may carry: `owner` is never granted by share. */
 export const SHARE_ROLES = ['admin', 'writer', 'commenter', 'viewer'] as const;

@@ -7,13 +7,29 @@ import { cursorQuerySchema } from '../api/pagination.js';
  * jobs (decision D21a) so `/ai/jobs/:id` and `/jobs/:id` read the same job.
  */
 
-export const JOB_STATUSES = ['queued', 'running', 'succeeded', 'failed', 'cancelled'] as const;
+export const JOB_STATUSES = [
+  'queued',
+  'running',
+  'succeeded',
+  'failed',
+  'cancelled',
+] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];
-export const TERMINAL_JOB_STATUSES = ['succeeded', 'failed', 'cancelled'] as const;
+export const TERMINAL_JOB_STATUSES = [
+  'succeeded',
+  'failed',
+  'cancelled',
+] as const;
 export const isTerminalJobStatus = (s: JobStatus): boolean =>
   (TERMINAL_JOB_STATUSES as readonly string[]).includes(s);
 
-export const JOB_LANES = ['ai', 'interactive', 'bulk', 'system', 'provider'] as const;
+export const JOB_LANES = [
+  'ai',
+  'interactive',
+  'bulk',
+  'system',
+  'provider',
+] as const;
 export type JobLane = (typeof JOB_LANES)[number];
 
 /**
@@ -31,10 +47,12 @@ export const JOB_KINDS = [
   'export.fountain',
   'export.fadein',
   'export.fadewright',
+  'export.json',
   'export.docx',
   'watermark.batch',
   'import.fdx',
   'import.fountain',
+  'import.fadein',
   'import.pdf',
   'import.ocr',
   'import.celtx',
@@ -157,7 +175,9 @@ export const jobSourceSchema = z.object({
   targetKind: z.string().min(1).max(40),
   targetId: z.string().min(1).max(100),
 });
-export type JobSource = z.infer<typeof jobSourceSchema> & { sourceHash?: string };
+export type JobSource = z.infer<typeof jobSourceSchema> & {
+  sourceHash?: string;
+};
 
 /** `POST /jobs`. `idempotencyKey` (or the `Idempotency-Key` header) makes a retried create return the original job. */
 export const jobCreateSchema = z.object({

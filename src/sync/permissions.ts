@@ -9,7 +9,8 @@ import type { Role } from '../tenancy/index.js';
 export const COMMENTER_WRITABLE_KEYS: readonly string[] = ['notes'];
 
 /** Inline marks a commenter may add or remove inside element text: note anchors `n:<NoteId>` and the highlighter. */
-export const isCommenterMark = (name: string): boolean => name === 'hl' || name.startsWith('n:');
+export const isCommenterMark = (name: string): boolean =>
+  name === 'hl' || name.startsWith('n:');
 
 /** What a role may produce (courtesy for the UI; the server check is the authority). */
 export interface MarkPermissions {

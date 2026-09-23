@@ -11,7 +11,10 @@ import { cursorQuerySchema } from '../api/pagination.js';
 /** Query encoding of a `SourceRef` (spec 05 §6.7.1): `live`, `snapshot:<snapshotId>` or `version:<versionId>`. */
 export const sourceParamSchema = z
   .string()
-  .regex(/^(live|snapshot:[A-Za-z0-9_-]+|version:[A-Za-z0-9_-]+)$/, 'source must be live, snapshot:<id> or version:<id>');
+  .regex(
+    /^(live|snapshot:[A-Za-z0-9_-]+|version:[A-Za-z0-9_-]+)$/,
+    'source must be live, snapshot:<id> or version:<id>'
+  );
 
 /** JSON-body source on a document route: the document is implied by the route (spec 03 `SourceRef` without `documentId`). */
 export const docSourceSchema = z.discriminatedUnion('kind', [
@@ -21,12 +24,16 @@ export const docSourceSchema = z.discriminatedUnion('kind', [
 ]);
 export type DocSource = z.infer<typeof docSourceSchema>;
 
-export const sourceQuerySchema = z.object({ source: sourceParamSchema.optional() });
+export const sourceQuerySchema = z.object({
+  source: sourceParamSchema.optional(),
+});
 export type SourceQuery = z.infer<typeof sourceQuerySchema>;
 
 export function sourceParamOf(ref: DocSource | undefined): string | undefined {
   if (!ref || ref.kind === 'live') return undefined;
-  return ref.kind === 'snapshot' ? `snapshot:${ref.snapshotId}` : `version:${ref.versionId}`;
+  return ref.kind === 'snapshot'
+    ? `snapshot:${ref.snapshotId}`
+    : `version:${ref.versionId}`;
 }
 
 // ─── Entities (spec 05 §6.12) ───────────────────────────────────────────────
@@ -76,7 +83,10 @@ export interface EntityDetail extends EntitySummary {
   worksheetIds: string[];
 }
 
-export const entityUsageQuerySchema = z.object({ variantId: z.string().min(1).optional(), source: sourceParamSchema.optional() });
+export const entityUsageQuerySchema = z.object({
+  variantId: z.string().min(1).optional(),
+  source: sourceParamSchema.optional(),
+});
 export type EntityUsageQuery = z.infer<typeof entityUsageQuerySchema>;
 
 export interface SceneRef {
@@ -93,8 +103,19 @@ export interface SceneRef {
  */
 export interface EntityUsage {
   total: number;
-  cues: { elementId: string; sceneId: string | null; sceneNumber: string | null; page: string | null; variantId: string | null }[];
-  headings: { sceneId: string; sceneNumber: string | null; page: string | null; variantId: string | null }[];
+  cues: {
+    elementId: string;
+    sceneId: string | null;
+    sceneNumber: string | null;
+    page: string | null;
+    variantId: string | null;
+  }[];
+  headings: {
+    sceneId: string;
+    sceneNumber: string | null;
+    page: string | null;
+    variantId: string | null;
+  }[];
   sceneLinks: SceneRef[];
   tags: { tagId: string; categoryId: string; sceneId: string | null }[];
   arcBeats: SceneRef[];
@@ -114,7 +135,12 @@ export const entityDialogueQuerySchema = z.object({
 export interface DialogueSceneView {
   sceneId: string;
   sceneNumber: string | null;
-  elements: { id: string; styleId: string; text: string; contentHash: string }[];
+  elements: {
+    id: string;
+    styleId: string;
+    text: string;
+    contentHash: string;
+  }[];
 }
 
 // ─── Tags, notes, beats, bin, revisions, changes, alternates ────────────────
@@ -185,7 +211,14 @@ export interface BinRow {
 }
 
 export interface RevisionsView {
-  sets: { id: string; name: string; color: string; mark: string; fullDraft: boolean; date: number | null }[];
+  sets: {
+    id: string;
+    name: string;
+    color: string;
+    mark: string;
+    fullDraft: boolean;
+    date: number | null;
+  }[];
   activeSetId: string | null;
   revisionMode: boolean;
   trackChanges: boolean;
@@ -214,7 +247,12 @@ export interface AlternatesView {
 
 export interface TitlePageRead {
   fields: Record<string, string>;
-  elements: { id: string; styleId: string; text: string; field: string | null }[];
+  elements: {
+    id: string;
+    styleId: string;
+    text: string;
+    field: string | null;
+  }[];
   computed: Record<string, unknown>;
 }
 
@@ -253,13 +291,27 @@ export const FOUNTAIN_MAX_BYTES = 1_000_000;
 
 // ─── Locators (spec 11 §1.3, spec 05 §6.7.2) ────────────────────────────────
 
-export const LOCATOR_KINDS = ['scene', 'element', 'shot', 'entity', 'page'] as const;
+export const LOCATOR_KINDS = [
+  'scene',
+  'element',
+  'shot',
+  'entity',
+  'page',
+] as const;
 export type LocatorKind = (typeof LOCATOR_KINDS)[number];
 
 export type ResolveResult =
   | { status: 'resolved'; kind: LocatorKind; id: string; label: string }
-  | { status: 'ambiguous'; kind: LocatorKind; candidates: { id: string; label: string; score: number }[] }
-  | { status: 'not_found'; kind: LocatorKind; suggestions: { id: string; label: string }[] };
+  | {
+      status: 'ambiguous';
+      kind: LocatorKind;
+      candidates: { id: string; label: string; score: number }[];
+    }
+  | {
+      status: 'not_found';
+      kind: LocatorKind;
+      suggestions: { id: string; label: string }[];
+    };
 
 export const RESOLVE_BATCH_MAX = 200;
 export const resolveBatchSchema = z.object({
@@ -268,14 +320,30 @@ export const resolveBatchSchema = z.object({
 });
 export type ResolveBatchRequest = z.infer<typeof resolveBatchSchema>;
 /** `GET /documents/:did/resolve?ref=&snapshotId=`. */
-export const resolveOneQuerySchema = z.object({ ref: z.string().min(1).max(500), snapshotId: z.string().min(1).optional() });
+export const resolveOneQuerySchema = z.object({
+  ref: z.string().min(1).max(500),
+  snapshotId: z.string().min(1).optional(),
+});
 
 // ─── Search (spec 05 §6.17) ─────────────────────────────────────────────────
 
-export const SEARCH_HIT_TYPES = ['document', 'scene', 'element', 'entity', 'note', 'asset'] as const;
+export const SEARCH_HIT_TYPES = [
+  'document',
+  'scene',
+  'element',
+  'entity',
+  'note',
+  'asset',
+] as const;
 export type SearchHitType = (typeof SEARCH_HIT_TYPES)[number];
 
-const csv = (v: unknown) => (typeof v === 'string' ? v.split(',').map(s => s.trim()).filter(Boolean) : v);
+const csv = (v: unknown) =>
+  typeof v === 'string'
+    ? v
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : v;
 
 export const searchQuerySchema = cursorQuerySchema.extend({
   q: z.string().min(1).max(200),

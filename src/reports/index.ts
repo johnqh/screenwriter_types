@@ -91,10 +91,32 @@ export interface ReportKindInfo {
   formats: readonly ReportFormat[];
 }
 
-const col = (id: string, label: string, align?: 'right'): ReportColumn => ({ id, label, ...(align ? { align } : {}) });
-const bool = (name: string, def: boolean, description?: string): ReportOptionDef => ({ name, type: 'boolean', default: def, ...(description ? { description } : {}) });
-const list = (name: string, description?: string): ReportOptionDef => ({ name, type: 'stringList', default: [], ...(description ? { description } : {}) });
-const en = (name: string, values: readonly string[], def: string): ReportOptionDef => ({ name, type: 'enum', values, default: def });
+const col = (id: string, label: string, align?: 'right'): ReportColumn => ({
+  id,
+  label,
+  ...(align ? { align } : {}),
+});
+const bool = (
+  name: string,
+  def: boolean,
+  description?: string
+): ReportOptionDef => ({
+  name,
+  type: 'boolean',
+  default: def,
+  ...(description ? { description } : {}),
+});
+const list = (name: string, description?: string): ReportOptionDef => ({
+  name,
+  type: 'stringList',
+  default: [],
+  ...(description ? { description } : {}),
+});
+const en = (
+  name: string,
+  values: readonly string[],
+  def: string
+): ReportOptionDef => ({ name, type: 'enum', values, default: def });
 
 interface ReportDef {
   featureId: string;
@@ -109,11 +131,28 @@ export const REPORT_DEFS: Record<ReportKind, ReportDef> = {
   scene: {
     featureId: 'F-RPT-001',
     title: 'Scene report',
-    options: [en('sort', ['scriptOrder', 'sceneNumber', 'location', 'scriptDay'], 'scriptOrder'), bool('includeOmitted', false)],
+    options: [
+      en(
+        'sort',
+        ['scriptOrder', 'sceneNumber', 'location', 'scriptDay'],
+        'scriptOrder'
+      ),
+      bool('includeOmitted', false),
+    ],
     columns: [
-      col('number', 'Scene'), col('intro', 'Intro'), col('location', 'Location'), col('time', 'Time'), col('heading', 'Heading'),
-      col('page', 'Page'), col('length', 'Length'), col('estTime', 'Est. time', 'right'), col('synopsis', 'Synopsis'),
-      col('colour', 'Colour'), col('speaking', 'Speaking'), col('nonSpeaking', 'Non-speaking'), col('scriptDay', 'Script day'),
+      col('number', 'Scene'),
+      col('intro', 'Intro'),
+      col('location', 'Location'),
+      col('time', 'Time'),
+      col('heading', 'Heading'),
+      col('page', 'Page'),
+      col('length', 'Length'),
+      col('estTime', 'Est. time', 'right'),
+      col('synopsis', 'Synopsis'),
+      col('colour', 'Colour'),
+      col('speaking', 'Speaking'),
+      col('nonSpeaking', 'Non-speaking'),
+      col('scriptDay', 'Script day'),
     ],
   },
   location: {
@@ -121,8 +160,13 @@ export const REPORT_DEFS: Record<ReportKind, ReportDef> = {
     title: 'Location report',
     options: [en('sort', ['name', 'firstAppearance', 'length'], 'name')],
     columns: [
-      col('location', 'Location'), col('intExt', 'INT/EXT'), col('times', 'Times of day'), col('scenes', 'Scenes'),
-      col('pages', 'Pages'), col('eighths', 'Length'), col('sceneCount', 'Scene count', 'right'),
+      col('location', 'Location'),
+      col('intExt', 'INT/EXT'),
+      col('times', 'Times of day'),
+      col('scenes', 'Scenes'),
+      col('pages', 'Pages'),
+      col('eighths', 'Length'),
+      col('sceneCount', 'Scene count', 'right'),
     ],
   },
   character: {
@@ -131,87 +175,168 @@ export const REPORT_DEFS: Record<ReportKind, ReportDef> = {
     options: [
       list('characters', 'Entity ids or names; empty means every character'),
       bool('includeNonSpeaking', false),
-      { name: 'monologueWords', type: 'number', default: 100, min: 1, max: 10000 },
+      {
+        name: 'monologueWords',
+        type: 'number',
+        default: 100,
+        min: 1,
+        max: 10000,
+      },
       bool('includeDialogue', false),
     ],
     columns: [
-      col('character', 'Character'), col('scenes', 'Speaking scenes'), col('nonSpeakingScenes', 'Non-speaking scenes'),
-      col('extensions', 'Extensions'), col('parentheticals', 'Parentheticals', 'right'), col('monologues', 'Monologues', 'right'),
+      col('character', 'Character'),
+      col('scenes', 'Speaking scenes'),
+      col('nonSpeakingScenes', 'Non-speaking scenes'),
+      col('extensions', 'Extensions'),
+      col('parentheticals', 'Parentheticals', 'right'),
+      col('monologues', 'Monologues', 'right'),
       col('dialogue', 'Dialogue'),
     ],
   },
   cast: {
     featureId: 'F-RPT-004',
     title: 'Cast report',
-    options: [en('sort', ['alphabetical', 'scriptOrder', 'dialogueCount', 'words'], 'alphabetical')],
+    options: [
+      en(
+        'sort',
+        ['alphabetical', 'scriptOrder', 'dialogueCount', 'words'],
+        'alphabetical'
+      ),
+    ],
     columns: [
-      col('character', 'Character'), col('dialogues', 'Dialogues', 'right'), col('words', 'Words', 'right'), col('lines', 'Lines', 'right'),
-      col('speakingScenes', 'Speaking scenes', 'right'), col('totalScenes', 'Total scenes', 'right'), col('pagesPresent', 'Pages present'),
-      col('firstAppearance', 'First appearance'), col('gender', 'Gender'), col('role', 'Role'), col('age', 'Age'),
+      col('character', 'Character'),
+      col('dialogues', 'Dialogues', 'right'),
+      col('words', 'Words', 'right'),
+      col('lines', 'Lines', 'right'),
+      col('speakingScenes', 'Speaking scenes', 'right'),
+      col('totalScenes', 'Total scenes', 'right'),
+      col('pagesPresent', 'Pages present'),
+      col('firstAppearance', 'First appearance'),
+      col('gender', 'Gender'),
+      col('role', 'Role'),
+      col('age', 'Age'),
     ],
   },
   dialogue: {
     featureId: 'F-RPT-005',
     title: 'Dialogue report',
-    options: [list('characters', 'Entity ids or names; empty means every character'), bool('includeParentheticals', false)],
-    columns: [col('number', '#', 'right'), col('scene', 'Scene'), col('page', 'Page'), col('character', 'Character'), col('text', 'Dialogue')],
+    options: [
+      list('characters', 'Entity ids or names; empty means every character'),
+      bool('includeParentheticals', false),
+    ],
+    columns: [
+      col('number', '#', 'right'),
+      col('scene', 'Scene'),
+      col('page', 'Page'),
+      col('character', 'Character'),
+      col('text', 'Dialogue'),
+    ],
   },
   script: {
     featureId: 'F-RPT-006',
     title: 'Script report',
     options: [list('styles', 'Style ids or roles; empty means every element')],
-    columns: [col('page', 'Page'), col('scene', 'Scene'), col('style', 'Style'), col('text', 'Text')],
+    columns: [
+      col('page', 'Page'),
+      col('scene', 'Scene'),
+      col('style', 'Style'),
+      col('text', 'Text'),
+    ],
   },
   text: {
     featureId: 'F-RPT-007',
     title: 'Text report',
     options: [
-      { name: 'q', type: 'string', required: true, description: 'Text to find' },
+      {
+        name: 'q',
+        type: 'string',
+        required: true,
+        description: 'Text to find',
+      },
       en('mode', ['text', 'regex'], 'text'),
       list('styles', 'Restrict to these style ids'),
     ],
-    columns: [col('page', 'Page'), col('scene', 'Scene'), col('style', 'Style'), col('snippet', 'Context')],
+    columns: [
+      col('page', 'Page'),
+      col('scene', 'Scene'),
+      col('style', 'Style'),
+      col('snippet', 'Context'),
+    ],
   },
   notes: {
     featureId: 'F-RPT-008',
     title: 'Notes report',
     options: [
-      list('types'), list('authors'), en('status', ['any', 'open', 'resolved'], 'any'), list('colours'),
+      list('types'),
+      list('authors'),
+      en('status', ['any', 'open', 'resolved'], 'any'),
+      list('colours'),
     ],
     columns: [
-      col('order', '#', 'right'), col('colour', 'Colour'), col('type', 'Type'), col('title', 'Title'), col('body', 'Note'),
-      col('author', 'Author'), col('created', 'Created'), col('modified', 'Modified'), col('page', 'Page'), col('scene', 'Scene'),
-      col('status', 'Status'), col('replies', 'Replies', 'right'),
+      col('order', '#', 'right'),
+      col('colour', 'Colour'),
+      col('type', 'Type'),
+      col('title', 'Title'),
+      col('body', 'Note'),
+      col('author', 'Author'),
+      col('created', 'Created'),
+      col('modified', 'Modified'),
+      col('page', 'Page'),
+      col('scene', 'Scene'),
+      col('status', 'Status'),
+      col('replies', 'Replies', 'right'),
     ],
   },
   synopsis: {
     featureId: 'F-RPT-009',
     title: 'Synopsis report',
     options: [bool('includeEmpty', true)],
-    columns: [col('number', 'Scene'), col('heading', 'Heading'), col('synopsis', 'Synopsis'), col('colour', 'Colour')],
+    columns: [
+      col('number', 'Scene'),
+      col('heading', 'Heading'),
+      col('synopsis', 'Synopsis'),
+      col('colour', 'Colour'),
+    ],
   },
   revisions: {
     featureId: 'F-RPT-010',
     title: 'Revisions report',
     options: [list('sets', 'Revision set ids; empty means every set')],
     columns: [
-      col('set', 'Revision'), col('colour', 'Colour'), col('mark', 'Mark'), col('date', 'Date'), col('pages', 'Pages'),
-      col('scenes', 'Scenes'), col('revisedElements', 'Revised elements', 'right'),
+      col('set', 'Revision'),
+      col('colour', 'Colour'),
+      col('mark', 'Mark'),
+      col('date', 'Date'),
+      col('pages', 'Pages'),
+      col('scenes', 'Scenes'),
+      col('revisedElements', 'Revised elements', 'right'),
     ],
   },
   tags: {
     featureId: 'F-RPT-011',
     title: 'Tags report',
-    options: [en('mode', ['byScene', 'byCategory'], 'byScene'), list('categories', 'Tag category ids; empty means all')],
+    options: [
+      en('mode', ['byScene', 'byCategory'], 'byScene'),
+      list('categories', 'Tag category ids; empty means all'),
+    ],
     columns: [
-      col('scene', 'Scene'), col('heading', 'Heading'), col('page', 'Page'), col('length', 'Length'), col('scriptDay', 'Script day'),
-      col('category', 'Category'), col('entities', 'Entities'),
+      col('scene', 'Scene'),
+      col('heading', 'Heading'),
+      col('page', 'Page'),
+      col('length', 'Length'),
+      col('scriptDay', 'Script day'),
+      col('category', 'Category'),
+      col('entities', 'Entities'),
     ],
   },
   statistics: {
     featureId: 'F-RPT-012',
     title: 'Statistics report',
-    options: [{ name: 'topWords', type: 'number', default: 20, min: 0, max: 200 }, { name: 'longestScenes', type: 'number', default: 5, min: 0, max: 50 }],
+    options: [
+      { name: 'topWords', type: 'number', default: 20, min: 0, max: 200 },
+      { name: 'longestScenes', type: 'number', default: 5, min: 0, max: 50 },
+    ],
     columns: [col('metric', 'Metric'), col('value', 'Value', 'right')],
   },
   inclusivity: {
@@ -219,48 +344,81 @@ export const REPORT_DEFS: Record<ReportKind, ReportDef> = {
     title: 'Inclusivity and gender analysis',
     options: [en('by', ['gender', 'role'], 'gender')],
     columns: [
-      col('group', 'Group'), col('characters', 'Characters', 'right'), col('dialogues', 'Dialogues', 'right'), col('words', 'Words', 'right'),
-      col('scenesSpeaking', 'Scenes speaking', 'right'), col('wordsPct', 'Words %', 'right'),
+      col('group', 'Group'),
+      col('characters', 'Characters', 'right'),
+      col('dialogues', 'Dialogues', 'right'),
+      col('words', 'Words', 'right'),
+      col('scenesSpeaking', 'Scenes speaking', 'right'),
+      col('wordsPct', 'Words %', 'right'),
     ],
   },
   presentProgressive: {
     featureId: 'F-RPT-014',
     title: 'Present progressive check',
     options: [],
-    columns: [col('page', 'Page'), col('scene', 'Scene'), col('match', 'Match'), col('text', 'Action line')],
+    columns: [
+      col('page', 'Page'),
+      col('scene', 'Scene'),
+      col('match', 'Match'),
+      col('text', 'Action line'),
+    ],
   },
   dayOutOfDays: {
     featureId: 'F-RPT-015',
     title: 'Day out of days',
     options: [],
-    columns: [col('character', 'Character'), col('workDays', 'Work days', 'right'), col('holds', 'Holds', 'right')],
+    columns: [
+      col('character', 'Character'),
+      col('workDays', 'Work days', 'right'),
+      col('holds', 'Holds', 'right'),
+    ],
   },
   shotList: {
     featureId: 'F-RPT-016',
     title: 'Shot list',
     options: [],
     columns: [
-      col('scene', 'Scene'), col('shot', 'Shot'), col('label', 'Label'), col('description', 'Description'), col('size', 'Size'),
-      col('angle', 'Angle'), col('movement', 'Movement'), col('lens', 'Lens'), col('durationSec', 'Duration (s)', 'right'),
+      col('scene', 'Scene'),
+      col('shot', 'Shot'),
+      col('label', 'Label'),
+      col('description', 'Description'),
+      col('size', 'Size'),
+      col('angle', 'Angle'),
+      col('movement', 'Movement'),
+      col('lens', 'Lens'),
+      col('durationSec', 'Duration (s)', 'right'),
     ],
   },
   structure: {
     featureId: 'F-RPT-017',
     title: 'Structure report',
     options: [],
-    columns: [col('node', 'Act / sequence / beat'), col('goal', 'Goal pages'), col('actual', 'Actual pages'), col('delta', 'Delta', 'right')],
-    unavailable: 'Outline page goals are not modelled in writing_core yet (spec 01 §5.13 goals), so there is nothing to compare actual pages with',
+    columns: [
+      col('node', 'Act / sequence / beat'),
+      col('goal', 'Goal pages'),
+      col('actual', 'Actual pages'),
+      col('delta', 'Delta', 'right'),
+    ],
+    unavailable:
+      'Outline page goals are not modelled in writing_core yet (spec 01 §5.13 goals), so there is nothing to compare actual pages with',
   },
   characterArcs: {
     featureId: 'F-RPT-018',
     title: 'Character arcs',
-    options: [list('characters', 'Entity ids or names; empty means every character')],
-    columns: [col('character', 'Character'), col('scene', 'Scene'), col('heading', 'Heading'), col('note', 'Arc note')],
+    options: [
+      list('characters', 'Entity ids or names; empty means every character'),
+    ],
+    columns: [
+      col('character', 'Character'),
+      col('scene', 'Scene'),
+      col('heading', 'Heading'),
+      col('note', 'Arc note'),
+    ],
   },
 };
 
 export function reportKindInfos(): ReportKindInfo[] {
-  return REPORT_KINDS.map(kind => {
+  return REPORT_KINDS.map((kind) => {
     const d = REPORT_DEFS[kind];
     return {
       kind,
@@ -275,47 +433,85 @@ export function reportKindInfos(): ReportKindInfo[] {
   });
 }
 
-export const isReportKind = (v: unknown): v is ReportKind => typeof v === 'string' && (REPORT_KINDS as readonly string[]).includes(v);
+export const isReportKind = (v: unknown): v is ReportKind =>
+  typeof v === 'string' && (REPORT_KINDS as readonly string[]).includes(v);
 
-export type ParsedReportOptions = { ok: true; options: Record<string, unknown> } | { ok: false; issues: { path: string; message: string }[] };
+export type ParsedReportOptions =
+  | { ok: true; options: Record<string, unknown> }
+  | { ok: false; issues: { path: string; message: string }[] };
 
 /** Validates and defaults `raw` against the kind's option declarations (unknown keys are refused). */
-export function parseReportOptions(kind: ReportKind, raw: unknown): ParsedReportOptions {
+export function parseReportOptions(
+  kind: ReportKind,
+  raw: unknown
+): ParsedReportOptions {
   const defs = REPORT_DEFS[kind].options;
   const issues: { path: string; message: string }[] = [];
   if (raw === undefined || raw === null) raw = {};
-  if (typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, issues: [{ path: '', message: 'options must be an object' }] };
+  if (typeof raw !== 'object' || Array.isArray(raw))
+    return {
+      ok: false,
+      issues: [{ path: '', message: 'options must be an object' }],
+    };
   const input = raw as Record<string, unknown>;
-  const known = new Set(defs.map(d => d.name));
-  for (const k of Object.keys(input)) if (!known.has(k)) issues.push({ path: k, message: 'unknown option' });
+  const known = new Set(defs.map((d) => d.name));
+  for (const k of Object.keys(input))
+    if (!known.has(k)) issues.push({ path: k, message: 'unknown option' });
   const out: Record<string, unknown> = {};
   for (const d of defs) {
     const v = input[d.name];
     if (v === undefined) {
       if (d.required) issues.push({ path: d.name, message: 'required' });
-      else if (d.default !== undefined) out[d.name] = Array.isArray(d.default) ? [...d.default] : d.default;
+      else if (d.default !== undefined)
+        out[d.name] = Array.isArray(d.default) ? [...d.default] : d.default;
       continue;
     }
     switch (d.type) {
       case 'boolean':
-        if (typeof v !== 'boolean') issues.push({ path: d.name, message: 'must be a boolean' });
+        if (typeof v !== 'boolean')
+          issues.push({ path: d.name, message: 'must be a boolean' });
         else out[d.name] = v;
         break;
       case 'number':
-        if (typeof v !== 'number' || !Number.isFinite(v) || (d.min !== undefined && v < d.min) || (d.max !== undefined && v > d.max)) {
-          issues.push({ path: d.name, message: `must be a number${d.min !== undefined ? ` from ${d.min}` : ''}${d.max !== undefined ? ` to ${d.max}` : ''}` });
+        if (
+          typeof v !== 'number' ||
+          !Number.isFinite(v) ||
+          (d.min !== undefined && v < d.min) ||
+          (d.max !== undefined && v > d.max)
+        ) {
+          issues.push({
+            path: d.name,
+            message: `must be a number${d.min !== undefined ? ` from ${d.min}` : ''}${d.max !== undefined ? ` to ${d.max}` : ''}`,
+          });
         } else out[d.name] = v;
         break;
       case 'string':
-        if (typeof v !== 'string' || (d.required && v.length === 0) || v.length > 500) issues.push({ path: d.name, message: 'must be a non-empty string of at most 500 characters' });
+        if (
+          typeof v !== 'string' ||
+          (d.required && v.length === 0) ||
+          v.length > 500
+        )
+          issues.push({
+            path: d.name,
+            message: 'must be a non-empty string of at most 500 characters',
+          });
         else out[d.name] = v;
         break;
       case 'enum':
-        if (typeof v !== 'string' || !d.values!.includes(v)) issues.push({ path: d.name, message: `must be one of ${d.values!.join(', ')}` });
+        if (typeof v !== 'string' || !d.values!.includes(v))
+          issues.push({
+            path: d.name,
+            message: `must be one of ${d.values!.join(', ')}`,
+          });
         else out[d.name] = v;
         break;
       case 'stringList':
-        if (!Array.isArray(v) || v.length > 500 || v.some(x => typeof x !== 'string')) issues.push({ path: d.name, message: 'must be an array of strings' });
+        if (
+          !Array.isArray(v) ||
+          v.length > 500 ||
+          v.some((x) => typeof x !== 'string')
+        )
+          issues.push({ path: d.name, message: 'must be an array of strings' });
         else out[d.name] = v;
         break;
     }
@@ -352,18 +548,28 @@ export type ReportRenderInput = z.infer<typeof reportRenderInputSchema>;
 
 // ─── Rendering (shared by the API's CSV/HTML/PDF and by any client that wants the same text) ─────────────
 
-export const cellText = (v: ReportCell): string => (v === null || v === undefined ? '' : String(v));
+export const cellText = (v: ReportCell): string =>
+  v === null || v === undefined ? '' : String(v);
 
-const csvField = (s: string) => (/[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
+const csvField = (s: string) =>
+  /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 
 /** CSV of every table (a title line and a blank line between tables when there is more than one). RFC 4180 quoting, CRLF. */
 export function reportToCsv(result: Pick<ReportResult, 'tables'>): string {
-  const blocks = result.tables.map(t => {
+  const blocks = result.tables.map((t) => {
     const lines: string[] = [];
     if (result.tables.length > 1 && t.title) lines.push(csvField(t.title));
-    lines.push(t.columns.map(c => csvField(c.label)).join(','));
-    for (const r of t.rows) lines.push(t.columns.map(c => csvField(cellText(r[c.id] ?? null))).join(','));
-    if (t.footer) lines.push(t.columns.map(c => csvField(cellText(t.footer![c.id] ?? null))).join(','));
+    lines.push(t.columns.map((c) => csvField(c.label)).join(','));
+    for (const r of t.rows)
+      lines.push(
+        t.columns.map((c) => csvField(cellText(r[c.id] ?? null))).join(',')
+      );
+    if (t.footer)
+      lines.push(
+        t.columns
+          .map((c) => csvField(cellText(t.footer![c.id] ?? null)))
+          .join(',')
+      );
     return lines.join('\r\n');
   });
   return blocks.join('\r\n\r\n') + '\r\n';

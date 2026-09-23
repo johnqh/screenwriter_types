@@ -19,7 +19,11 @@ export interface ConversionDiagnostic {
   message: string;
   feature: string;
   count: number;
-  locations?: { elementIndex?: number; sourceLine?: number; sourcePath?: string }[];
+  locations?: {
+    elementIndex?: number;
+    sourceLine?: number;
+    sourcePath?: string;
+  }[];
 }
 
 /** Mirror of `writing_formats` `ConversionReport` (spec 04 §3.1). */
@@ -28,7 +32,12 @@ export interface ConversionReport {
   format: string;
   sourceVersion?: string;
   diagnostics: ConversionDiagnostic[];
-  stats: { elements: number; scenes: number; pages?: number; durationMs: number };
+  stats: {
+    elements: number;
+    scenes: number;
+    pages?: number;
+    durationMs: number;
+  };
   confidence?: number;
   summary: { info: number; warn: number; loss: number; error: number };
 }
