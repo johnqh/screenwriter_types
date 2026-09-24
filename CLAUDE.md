@@ -48,3 +48,7 @@ bun run lint
 ## Related
 
 `writing_core`, `screenwriter_api`, `screenwriter_client`, `screenwriter_lib`, `screenwriter_plans`
+
+## Synchronous AI actions (`src/ai/actions.ts`)
+
+Request, model (what the ShapeShyft endpoint returns: every field required, nullable never optional, objects closed) and result Zod schemas for `POST /ai/{action}` in `screenwriter_api`: `generate-character-skeleton`, `generate-script`, `polish-character-dialogue`, `polish-scene`, plus `AI_ACTION_LIMITS`, `CHARACTER_SKELETON_KEYS` (the flat skeleton the app's `CharacterSkeletonEditor` edits: `age` required, ~34 optional strings across Physical/Social/Psychological), the `/ai/{action}` rows in `API_ROUTES` (`U`), and `AiActionResponse`. `AI_ACTION_MODEL_SCHEMAS` feeds `bun run ai:schemas` in the API, which is what gets stored on the ShapeShyft endpoints, so changing a model schema means updating those endpoints too.

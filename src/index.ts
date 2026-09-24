@@ -20,6 +20,7 @@ export * from './formats/index.js';
 export * from './io/index.js';
 export * from './keys/index.js';
 export * from './ai/index.js';
+export * from './ai/actions.js';
 export * from './jobs/index.js';
 export * from './reads/index.js';
 export * from './reports/index.js';

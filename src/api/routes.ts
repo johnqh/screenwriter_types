@@ -217,6 +217,15 @@ export const API_ROUTES = {
   // B7 AI: script review and polish. Keys need the `ai` flag (403 AI_KEY_NOT_PERMITTED) and, to start
   // jobs or decide suggestions, read_write scope.
   aiStatus: r('GET', '/ai/status', 'U,Kr'),
+  // Synchronous AI actions (`ai/actions.ts`): user principals only, gated by AI consent, a daily limit and credits.
+  aiGenerateCharacterSkeleton: r(
+    'POST',
+    '/ai/generate-character-skeleton',
+    'U'
+  ),
+  aiGenerateScript: r('POST', '/ai/generate-script', 'U'),
+  aiPolishCharacterDialogue: r('POST', '/ai/polish-character-dialogue', 'U'),
+  aiPolishScene: r('POST', '/ai/polish-scene', 'U'),
   aiJobCreate: r('POST', '/documents/:did/ai/jobs', 'U,Krw', 'ai.run'),
   aiJobsList: r('GET', '/documents/:did/ai/jobs', 'U,Kr', 'document.read'),
   aiJobGet: r('GET', '/ai/jobs/:jobId', 'U,Kr', 'document.read'),
