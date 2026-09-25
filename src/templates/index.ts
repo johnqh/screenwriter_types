@@ -78,7 +78,7 @@ export interface TemplateArchiveResponse {
   archived: true;
 }
 
-/** Template file formats: Fadewright's own JSON and the two foreign ones spec 04 §4.3 names. */
+/** Template file formats: ViaInk's own JSON and the two foreign ones spec 04 §4.3 names. */
 export const TEMPLATE_FILE_FORMATS = [
   'fwtemplate',
   'fadein-template',

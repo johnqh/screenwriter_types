@@ -1,6 +1,6 @@
 /**
  * @sudobility/screenwriter_types
- * Shared types and Zod schemas for the Fadewright frontend and backend.
+ * Shared types and Zod schemas for the ViaInk frontend and backend.
  * Import from the package root only.
  */
 export * from './api/envelope.js';

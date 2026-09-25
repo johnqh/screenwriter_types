@@ -1,6 +1,6 @@
 # @sudobility/screenwriter_types
 
-Shared TypeScript types and Zod schemas for the Fadewright screenwriting app, used by both the frontend and the backend.
+Shared TypeScript types and Zod schemas for the ViaInk screenwriting app, used by both the frontend and the backend.
 
 ## Contents
 

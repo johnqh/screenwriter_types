@@ -1,6 +1,6 @@
 # screenwriter_types
 
-Shared TypeScript types and Zod v4 schemas for Fadewright (frontend and backend). Platform-free ESM: no DOM, no Node built-ins, no clock reads. Consumers import from the package root only (plus `/test` for fixtures).
+Shared TypeScript types and Zod v4 schemas for ViaInk (frontend and backend). Platform-free ESM: no DOM, no Node built-ins, no clock reads. Consumers import from the package root only (plus `/test` for fixtures).
 
 ## Stack
 

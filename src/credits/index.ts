@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 /**
  * Credits (spec 05 §6.20, spec 06 §10): a thin re-export of `@sudobility/types`' generic consumables
- * shapes, plus the two things specific to Fadewright — the priced product catalog and the purchase
+ * shapes, plus the two things specific to ViaInk — the priced product catalog and the purchase
  * handoff for platforms that cannot buy in-app (spec 05 §6.21).
  *
  * The ledger itself (`consumable_balances/_purchases/_usages`) is `@sudobility/consumables_service`'s,
