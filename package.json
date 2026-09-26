@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/screenwriter_types",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Shared TypeScript types and Zod schemas for the Fadewright frontend and backend",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,7 +35,7 @@
   "author": "Sudobility",
   "license": "BUSL-1.1",
   "dependencies": {
-    "@sudobility/types": "^1.9.67",
+    "@sudobility/types": "^1.9.68",
     "@sudobility/writing_core": "^0.1.2",
     "lib0": "0.2.117",
     "zod": "^4.6.5"
