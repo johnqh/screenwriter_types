@@ -39,3 +39,28 @@ export interface PurchaseHandoffResponse {
   handoffUrl: string;
   expiresAt: string;
 }
+
+export interface CreditCouponHistoryItem {
+  workspaceId: string;
+  userId: string;
+  credits: number;
+  redeemedAt: string;
+}
+export interface CreditCoupon {
+  id: string;
+  code: string;
+  credits: number;
+  expiresAt: string;
+  email: string | null;
+  createdAt: string;
+  history: CreditCouponHistoryItem[];
+}
+export interface CreditCouponCreateRequest {
+  credits: number;
+  expires_at: string;
+  email?: string | null;
+}
+export interface CreditCouponRedeemResponse {
+  credits: number;
+  balance: number;
+}

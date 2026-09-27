@@ -313,6 +313,7 @@ export const API_ROUTES = {
   invitationRenew: r('POST', '/invitations/:iid/renew', 'U'),
   invitationCancel: r('DELETE', '/invitations/:iid', 'U'),
   invitationAccept: r('POST', '/invitations/accept', 'U'),
+  invitationAcceptById: r('POST', '/invitations/:iid/accept', 'U'),
   invitationDecline: r('POST', '/invitations/:iid/decline', 'U'),
   sharedWithMe: r('GET', '/me/shared', 'U,Kr'),
   documentLock: r('POST', '/documents/:did/lock', 'U', 'document.lock'),
@@ -754,6 +755,10 @@ export const API_ROUTES = {
     'document.edit'
   ),
   consumablesBalance: r('GET', '/consumables/balance', 'U,Kr'),
+  consumablesPurchaseTarget: r('POST', '/consumables/purchase-target', 'U'),
+  consumablesRedeemCoupon: r('POST', '/consumables/redeem-coupon', 'U'),
+  consumablesCouponsList: r('GET', '/consumables/coupons/history', 'U'),
+  consumablesCouponsCreate: r('POST', '/consumables/coupons', 'U'),
   consumablesPurchases: r('GET', '/consumables/purchases', 'U'),
   consumablesUsages: r('GET', '/consumables/usages', 'U'),
   consumablesProducts: r('GET', '/consumables/products', 'U,Kr,P'),
