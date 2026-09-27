@@ -41,7 +41,7 @@ export interface PurchaseHandoffResponse {
 }
 
 export interface CreditCouponHistoryItem {
-  workspaceId: string;
+  entityId: string;
   userId: string;
   credits: number;
   redeemedAt: string;

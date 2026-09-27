@@ -17,7 +17,7 @@ export interface ApiKeySummary {
   name: string;
   /** The 8-char public prefix. */
   prefix: string;
-  workspaceId: string;
+  entityId: string;
   scope: ApiKeyScope;
   ai: boolean;
   createdAt: string;
@@ -28,7 +28,7 @@ export interface ApiKeySummary {
 
 export const apiKeyCreateSchema = z.object({
   name: z.string().trim().min(1).max(60),
-  workspaceId: z.string().min(1),
+  entityId: z.string().min(1),
   scope: apiKeyScopeSchema,
   ai: z.boolean().default(false),
   expiresInDays: z.number().int().min(1).max(365).optional(),

@@ -73,8 +73,8 @@ export interface AdminUserRestoreResponse {
 /**
  * `DELETE /admin/users/:uid`: schedules an IMMEDIATE deletion (no grace period) and revokes the user's API keys and
  * share links — the same bounded action `DELETE /me` takes, admin-triggered. **Not** a destructive data purge: no
- * `system.purge` job exists anywhere in this codebase yet to actually delete a user's workspaces/documents/content,
- * and `workspaces.created_by` is `ON DELETE RESTRICT`, so a raw row delete cannot work without first reassigning
+ * `system.purge` job exists anywhere in this codebase yet to actually delete a user's entities/documents/content,
+ * and `entities.created_by` is `ON DELETE RESTRICT`, so a raw row delete cannot work without first reassigning
  * or deleting every workspace the person created — real work for that job, not this route.
  */
 export interface AdminUserPurgeResponse {
@@ -87,7 +87,7 @@ export interface AdminDocumentMeta {
   title: string;
   kind: string;
   projectId: string;
-  workspaceId: string;
+  entityId: string;
   ownerEmail: string | null;
   epoch: number;
   schemaVersion: number;

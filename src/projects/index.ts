@@ -26,7 +26,7 @@ export const documentLabelsSchema = z
 
 export interface ProjectSummary {
   id: string;
-  workspaceId: string;
+  entityId: string;
   name: string;
   description: string | null;
   color: string | null;
@@ -42,7 +42,7 @@ export interface ProjectSummary {
 export interface DocumentMeta {
   id: string;
   projectId: string;
-  workspaceId: string;
+  entityId: string;
   folderId: string | null;
   kind: DocumentKind;
   title: string;
@@ -102,7 +102,7 @@ export const projectUpdateSchema = z.object({
   color: z.string().max(32).nullable().optional(),
   kind: projectKindSchema.optional(),
   logline: z.string().max(2000).nullable().optional(),
-  workspaceId: z.string().optional(),
+  entityId: z.string().optional(),
 });
 export type ProjectUpdateRequest = z.infer<typeof projectUpdateSchema>;
 

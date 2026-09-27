@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const WORKSPACE_KINDS = ['personal', 'team'] as const;
-export type WorkspaceKind = (typeof WORKSPACE_KINDS)[number];
+export const ENTITY_KINDS = ['personal', 'team'] as const;
+export type EntityKind = (typeof ENTITY_KINDS)[number];
 
 /** Ordered by authority (spec 05 §5.2). */
 export const ROLES = [
@@ -13,17 +13,17 @@ export const ROLES = [
 ] as const;
 export type Role = (typeof ROLES)[number];
 
-export const workspaceKindSchema = z.enum(WORKSPACE_KINDS);
+export const entityKindSchema = z.enum(ENTITY_KINDS);
 export const roleSchema = z.enum(ROLES);
 
-export interface WorkspaceSummary {
+export interface ManagedEntitySummary {
   id: string;
-  kind: WorkspaceKind;
+  kind: EntityKind;
   name: string;
   avatarAssetId: string | null;
 }
 
-export interface Workspace extends WorkspaceSummary {
+export interface ManagedEntity extends ManagedEntitySummary {
   defaultTemplateId: string | null;
   defaultLanguage: string;
   aiEnabled: boolean;
@@ -33,11 +33,11 @@ export interface Workspace extends WorkspaceSummary {
   updatedAt: string;
 }
 
-/** `GET /workspaces` item: summary plus the caller's role. */
-export type WorkspaceListItem = WorkspaceSummary & { role: Role };
+/** `GET /entities` item: summary plus the caller's role. */
+export type ManagedEntityListItem = ManagedEntitySummary & { role: Role };
 
-/** `GET /workspaces/:wid` */
-export type WorkspaceDetail = Workspace & {
+/** `GET /entities/:wid` */
+export type ManagedEntityDetail = ManagedEntity & {
   role: Role;
   memberCount: number;
   storageBytes: number;
@@ -53,13 +53,13 @@ export type WorkspaceDetail = Workspace & {
  *  - `project.trash` / `project.restore` for a writer only applies to projects they created.
  */
 export const PERMISSION_MIN_ROLE = {
-  'workspace.read': 'viewer',
-  'workspace.update': 'admin',
-  'workspace.aiToggle': 'owner',
-  'workspace.audit': 'admin',
-  'workspace.delete': 'owner',
-  'workspace.transfer': 'owner',
-  'workspace.leave': 'viewer',
+  'entity.read': 'viewer',
+  'entity.update': 'admin',
+  'entity.aiToggle': 'owner',
+  'entity.audit': 'admin',
+  'entity.delete': 'owner',
+  'entity.transfer': 'owner',
+  'entity.leave': 'viewer',
   'members.read': 'viewer',
   'members.invite': 'admin',
   'members.updateRole': 'admin',

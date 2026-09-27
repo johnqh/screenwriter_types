@@ -22,7 +22,7 @@ export interface Me {
   uiLanguage: string;
   timeZone: string;
   siteAdmin: boolean;
-  personalWorkspaceId: string;
+  personalEntityId: string;
   createdAt: string;
   /** Set while an account deletion is scheduled (`DELETE /me`); `POST /me/restore` clears it. */
   deletionScheduledFor?: string | null;

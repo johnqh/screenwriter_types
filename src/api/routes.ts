@@ -26,14 +26,14 @@ export const API_ROUTES = {
   health: r('GET', '/health', 'P'),
   meGet: r('GET', '/me', 'U,Kr'),
   mePatch: r('PATCH', '/me', 'U'),
-  // B2 workspaces
-  workspacesList: r('GET', '/workspaces', 'U,Kr'),
-  workspaceGet: r('GET', '/workspaces/:wid', 'U,Kr', 'workspace.read'),
+  // B2 entities
+  entitiesList: r('GET', '/entities', 'U,Kr'),
+  entityGetDetails: r('GET', '/entities/:entityId', 'U,Kr', 'entity.read'),
   // B2 projects
-  projectsList: r('GET', '/workspaces/:wid/projects', 'U,Kr', 'project.read'),
+  projectsList: r('GET', '/entities/:wid/projects', 'U,Kr', 'project.read'),
   projectCreate: r(
     'POST',
-    '/workspaces/:wid/projects',
+    '/entities/:wid/projects',
     'U,Krw',
     'project.create'
   ),
@@ -255,39 +255,34 @@ export const API_ROUTES = {
     'document.edit'
   ),
   // B8 tenancy, roles, sharing. Keys (K) only read members and /me/shared; everything else is user-only (403 API_KEY_FORBIDDEN).
-  workspaceCreate: r('POST', '/workspaces', 'U'),
-  workspaceUpdate: r('PATCH', '/workspaces/:wid', 'U', 'workspace.update'),
-  workspaceDelete: r('DELETE', '/workspaces/:wid', 'U', 'workspace.delete'),
-  workspaceTransfer: r(
+  entityCreate: r('POST', '/entities', 'U'),
+  entityUpdate: r('PATCH', '/entities/:entityId', 'U', 'entity.update'),
+  entityDelete: r('DELETE', '/entities/:entityId', 'U', 'entity.delete'),
+  entityTransfer: r(
     'POST',
-    '/workspaces/:wid/transfer',
+    '/entities/:entityId/transfer',
     'U',
-    'workspace.transfer'
+    'entity.transfer'
   ),
-  workspaceLeave: r('POST', '/workspaces/:wid/leave', 'U', 'workspace.leave'),
-  workspaceUsage: r('GET', '/workspaces/:wid/usage', 'U', 'workspace.read'),
-  workspaceAudit: r(
-    'GET',
-    '/workspaces/:wid/audit.csv',
-    'U',
-    'workspace.audit'
-  ),
-  membersList: r('GET', '/workspaces/:wid/members', 'U,Kr', 'members.read'),
+  entityLeave: r('POST', '/entities/:entityId/leave', 'U', 'entity.leave'),
+  managedEntityUsage: r('GET', '/entities/:entityId/usage', 'U', 'entity.read'),
+  entityAudit: r('GET', '/entities/:entityId/audit.csv', 'U', 'entity.audit'),
+  membersList: r('GET', '/entities/:wid/members', 'U,Kr', 'members.read'),
   memberUpdate: r(
     'PATCH',
-    '/workspaces/:wid/members/:uid',
+    '/entities/:wid/members/:uid',
     'U',
     'members.updateRole'
   ),
   memberRemove: r(
     'DELETE',
-    '/workspaces/:wid/members/:uid',
+    '/entities/:wid/members/:uid',
     'U',
     'members.remove'
   ),
-  invitationCreateWorkspace: r(
+  invitationCreateEntity: r(
     'POST',
-    '/workspaces/:wid/invitations',
+    '/entities/:entityId/invitations',
     'U',
     'members.invite'
   ),
@@ -303,9 +298,9 @@ export const API_ROUTES = {
     'U',
     'share.manage'
   ),
-  workspaceInvitationsList: r(
+  entityInvitationsList: r(
     'GET',
-    '/workspaces/:wid/invitations',
+    '/entities/:entityId/invitations',
     'U',
     'members.invite'
   ),
@@ -377,7 +372,12 @@ export const API_ROUTES = {
   // B10 projection-backed reads, search, reports, packets (spec 05 §6.7.1, §6.7.2, §6.12, §6.14, §6.15, §6.17, §6.18, §6.22).
   // `?source=live|snapshot:<id>|version:<id>` selects the state a read answers from. Keys (K) read all of these; the report
   // and resolve POSTs are reads, so a read-only key may send them.
-  entitiesList: r('GET', '/documents/:did/entities', 'U,Kr,L', 'document.read'),
+  documentEntitiesList: r(
+    'GET',
+    '/documents/:did/entities',
+    'U,Kr,L',
+    'document.read'
+  ),
   entityGet: r(
     'GET',
     '/documents/:did/entities/:eid',
@@ -436,12 +436,7 @@ export const API_ROUTES = {
   resolveBatch: r('POST', '/documents/:did/resolve', 'U,Kr,L', 'document.read'),
   resolveOne: r('GET', '/documents/:did/resolve', 'U,Kr,L', 'document.read'),
   documentSearch: r('GET', '/documents/:did/search', 'U,Kr,L', 'document.read'),
-  workspaceSearch: r(
-    'GET',
-    '/workspaces/:wid/search',
-    'U,Kr',
-    'workspace.read'
-  ),
+  workspaceSearch: r('GET', '/entities/:wid/search', 'U,Kr', 'entity.read'),
   search: r('GET', '/search', 'U,Kr'),
   reportKinds: r('GET', '/reports/kinds', 'U,Kr'),
   reportGet: r('GET', '/documents/:did/reports/:kind', 'U,Kr,L', 'reports.run'),
@@ -504,14 +499,14 @@ export const API_ROUTES = {
   // trash-empty, workspace defaults and contacts are user-only (a key gets 403 API_KEY_FORBIDDEN).
   workspaceDocuments: r(
     'GET',
-    '/workspaces/:wid/documents',
+    '/entities/:wid/documents',
     'U,Kr',
     'project.read'
   ),
-  workspaceTrash: r('GET', '/workspaces/:wid/trash', 'U,Kr', 'project.read'),
+  workspaceTrash: r('GET', '/entities/:wid/trash', 'U,Kr', 'project.read'),
   workspaceTrashEmpty: r(
     'POST',
-    '/workspaces/:wid/trash/empty',
+    '/entities/:wid/trash/empty',
     'U',
     'project.purge'
   ),
@@ -575,39 +570,39 @@ export const API_ROUTES = {
   ),
   workspaceDefaultsGet: r(
     'GET',
-    '/workspaces/:wid/defaults',
+    '/entities/:wid/defaults',
     'U,Kr',
-    'workspace.read'
+    'entity.read'
   ),
   workspaceDefaultsSet: r(
     'PUT',
-    '/workspaces/:wid/defaults',
+    '/entities/:wid/defaults',
     'U',
-    'workspace.update'
+    'entity.update'
   ),
   workspaceContactsList: r(
     'GET',
-    '/workspaces/:wid/contacts',
+    '/entities/:wid/contacts',
     'U',
-    'workspace.read'
+    'entity.read'
   ),
   workspaceContactsCreate: r(
     'POST',
-    '/workspaces/:wid/contacts',
+    '/entities/:wid/contacts',
     'U',
-    'workspace.update'
+    'entity.update'
   ),
   workspaceContactUpdate: r(
     'PATCH',
-    '/workspace-contacts/:cid',
+    '/entity-contacts/:cid',
     'U',
-    'workspace.update'
+    'entity.update'
   ),
   workspaceContactDelete: r(
     'DELETE',
-    '/workspace-contacts/:cid',
+    '/entity-contacts/:cid',
     'U',
-    'workspace.update'
+    'entity.update'
   ),
   // B16 imports, exports and watermark as jobs (spec 05 §6.18). `POST /imports*` and `/uploads/state` are `Krw`; exports are `Kr` (a read key may
   // export what it can read); the watermark lookup is user-only (403 API_KEY_FORBIDDEN for a key). The synchronous
@@ -635,15 +630,15 @@ export const API_ROUTES = {
   ),
   watermarkLookup: r(
     'POST',
-    '/workspaces/:wid/watermark-lookup',
+    '/entities/:wid/watermark-lookup',
     'U',
-    'workspace.audit'
+    'entity.audit'
   ),
   // B11 assets and R2 (spec 05 §6.13). Bytes go to object storage through presigned URLs, never through the API. Writes are `Krw`, reads `Kr`;
   // share-link readers (`L`) are not built (no `/share/:token/assets` route yet). The uploader routes check the caller is the uploader.
   assetUploadCreate: r(
     'POST',
-    '/workspaces/:wid/assets/uploads',
+    '/entities/:wid/assets/uploads',
     'U,Krw',
     'assets.upload'
   ),
@@ -699,12 +694,7 @@ export const API_ROUTES = {
     'U,Kr',
     'document.activity'
   ),
-  workspaceActivity: r(
-    'GET',
-    '/workspaces/:wid/activity',
-    'U',
-    'workspace.read'
-  ),
+  workspaceActivity: r('GET', '/entities/:wid/activity', 'U', 'entity.read'),
   notificationsList: r('GET', '/notifications', 'U'),
   notificationsRead: r('POST', '/notifications/read', 'U'),
   notificationDelete: r('DELETE', '/notifications/:nid', 'U'),
@@ -725,9 +715,9 @@ export const API_ROUTES = {
   meAiActivity: r('GET', '/me/ai-activity', 'U'),
   workspaceAiActivity: r(
     'GET',
-    '/workspaces/:wid/ai-activity',
+    '/entities/:wid/ai-activity',
     'U',
-    'workspace.audit'
+    'entity.audit'
   ),
   aiEstimate: r('POST', '/documents/:did/ai/estimate', 'U,Kr', 'document.read'),
   aiReportsList: r(

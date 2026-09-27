@@ -347,7 +347,7 @@ const csv = (v: unknown) =>
 
 export const searchQuerySchema = cursorQuerySchema.extend({
   q: z.string().min(1).max(200),
-  workspaceId: z.string().min(1).optional(),
+  entityId: z.string().min(1).optional(),
   projectId: z.string().min(1).optional(),
   documentId: z.string().min(1).optional(),
   types: z.preprocess(csv, z.array(z.enum(SEARCH_HIT_TYPES)).min(1)).optional(),

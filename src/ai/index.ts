@@ -376,7 +376,7 @@ export interface AiEstimateResponse {
 
 // ---- Activity (spec 05 §6.3) ----
 
-/** `GET /me/ai-activity`, `GET /workspaces/:wid/ai-activity` (the latter adds `userId`). */
+/** `GET /me/ai-activity`, `GET /entities/:wid/ai-activity` (the latter adds `userId`). */
 export interface AiActivityItem {
   jobId: string;
   task: AiTask;

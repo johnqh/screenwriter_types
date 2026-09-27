@@ -152,7 +152,7 @@ export interface Notification {
   kind: NotificationKind;
   /** Ids and display strings only; never document/script content (spec 05 §8.7). */
   payload: Record<string, unknown>;
-  workspaceId: string | null;
+  entityId: string | null;
   documentId: string | null;
   readAt: string | null;
   createdAt: string;
@@ -289,7 +289,7 @@ export interface ActivityEvent {
   targetIds: string[];
   createdAt: string;
 }
-/** `GET /workspaces/:wid/activity` items also carry the document they happened on. */
+/** `GET /entities/:wid/activity` items also carry the document they happened on. */
 export interface WorkspaceActivityEvent extends ActivityEvent {
   documentId: string | null;
 }

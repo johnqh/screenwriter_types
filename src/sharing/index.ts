@@ -8,13 +8,13 @@ import { roleSchema, type Role } from '../tenancy/index.js';
 
 export const TEAM_WORKSPACE_LIMIT = 50;
 
-export const workspaceCreateSchema = z.object({
+export const entityCreateSchema = z.object({
   name: z.string().trim().min(1).max(80),
   avatarAssetId: z.string().min(1).nullable().optional(),
 });
-export type WorkspaceCreateRequest = z.infer<typeof workspaceCreateSchema>;
+export type EntityCreateRequest = z.infer<typeof entityCreateSchema>;
 
-export const workspaceUpdateSchema = z.object({
+export const entityUpdateSchema = z.object({
   name: z.string().trim().min(1).max(80).optional(),
   avatarAssetId: z.string().min(1).nullable().optional(),
   defaultTemplateId: z.string().min(1).nullable().optional(),
@@ -22,26 +22,26 @@ export const workspaceUpdateSchema = z.object({
   aiEnabled: z.boolean().optional(),
   allowPublicLinks: z.boolean().optional(),
 });
-export type WorkspaceUpdateRequest = z.infer<typeof workspaceUpdateSchema>;
+export type EntityUpdateRequest = z.infer<typeof entityUpdateSchema>;
 
-export const workspaceDeleteSchema = z.object({ confirmName: z.string() });
-export type WorkspaceDeleteRequest = z.infer<typeof workspaceDeleteSchema>;
-/** `DELETE /workspaces/:wid` response (soft delete). */
-export interface WorkspaceDeleteResponse {
+export const entityDeleteSchema = z.object({ confirmName: z.string() });
+export type EntityDeleteRequest = z.infer<typeof entityDeleteSchema>;
+/** `DELETE /entities/:wid` response (soft delete). */
+export interface EntityDeleteResponse {
   deletedAt: string;
 }
 
-export const workspaceTransferSchema = z.object({
+export const entityTransferSchema = z.object({
   toUserId: z.string().min(1),
 });
-export type WorkspaceTransferRequest = z.infer<typeof workspaceTransferSchema>;
+export type EntityTransferRequest = z.infer<typeof entityTransferSchema>;
 
-/** `GET /workspaces/:wid/audit.csv` query: an ISO-8601 range of at most one year. */
-export const workspaceAuditQuerySchema = z.object({
+/** `GET /entities/:wid/audit.csv` query: an ISO-8601 range of at most one year. */
+export const entityAuditQuerySchema = z.object({
   from: z.iso.datetime({ offset: true }).optional(),
   to: z.iso.datetime({ offset: true }).optional(),
 });
-export type WorkspaceAuditQuery = z.infer<typeof workspaceAuditQuerySchema>;
+export type EntityAuditQuery = z.infer<typeof entityAuditQuerySchema>;
 export const AUDIT_CSV_COLUMNS = [
   'created_at',
   'actor',
@@ -52,7 +52,7 @@ export const AUDIT_CSV_COLUMNS = [
 ] as const;
 export const AUDIT_MAX_RANGE_DAYS = 366;
 
-export interface WorkspaceUsage {
+export interface EntityUsageOverview {
   storageBytes: number;
   quotaBytes: number;
   documentCount: number;
@@ -75,7 +75,7 @@ export type MemberUpdateRequest = z.infer<typeof memberUpdateSchema>;
 
 // ─── Invitations ────────────────────────────────────────────────────────────
 
-export const INVITATION_TARGETS = ['workspace', 'project', 'document'] as const;
+export const INVITATION_TARGETS = ['entity', 'project', 'document'] as const;
 export type InvitationTarget = (typeof INVITATION_TARGETS)[number];
 export const INVITATION_TTL_DAYS = 14;
 export const INVITATION_STATUSES = [
@@ -98,7 +98,7 @@ export type InvitationCreateRequest = z.infer<typeof invitationCreateSchema>;
 export interface Invitation {
   id: string;
   targetType: InvitationTarget;
-  workspaceId: string;
+  entityId: string;
   projectId: string | null;
   documentId: string | null;
   email: string;
@@ -115,14 +115,14 @@ export interface Invitation {
 export const invitationAcceptSchema = z.object({ token: z.string().min(1) });
 export type InvitationAcceptRequest = z.infer<typeof invitationAcceptSchema>;
 export interface InvitationAcceptResult {
-  workspaceId?: string;
+  entityId?: string;
   projectId?: string;
   documentId?: string;
 }
 
 /** Where an invitation, grant list or link list points. */
 export type ShareTarget =
-  | { type: 'workspace'; id: string }
+  | { type: 'entity'; id: string }
   | { type: 'project'; id: string }
   | { type: 'document'; id: string };
 
@@ -151,7 +151,7 @@ export interface SharedItem {
   id: string;
   title: string;
   role: Role;
-  workspaceId: string;
+  entityId: string;
   /** For a document: its project. */
   projectId: string | null;
   projectName: string | null;

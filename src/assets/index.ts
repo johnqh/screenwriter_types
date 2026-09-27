@@ -428,7 +428,7 @@ export interface AssetVersion {
 
 export interface AssetSummary {
   id: string;
-  workspaceId: string;
+  entityId: string;
   kind: AssetKind;
   title: string;
   description: string;
@@ -450,11 +450,11 @@ export interface AssetSummary {
 
 export interface AssetLink {
   id: string;
-  workspaceId: string;
+  entityId: string;
   assetId: string;
   /** Null = follow the asset's current version. */
   pinnedVersionId: string | null;
-  /** Null = a workspace-level link (its target is `{kind: 'document', id: <workspaceId>}`). */
+  /** Null = a workspace-level link (its target is `{kind: 'document', id: <entityId>}`). */
   documentId: string | null;
   targetKind: AssetTargetKind;
   targetId: string;
@@ -573,7 +573,7 @@ const linkedToSchema = z
   );
 
 export const assetListQuerySchema = cursorQuerySchema.extend({
-  workspaceId: z.string().min(1).optional(),
+  entityId: z.string().min(1).optional(),
   documentId: z.string().min(1).optional(),
   linkedTo: linkedToSchema.optional(),
   role: assetRoleSchema.optional(),

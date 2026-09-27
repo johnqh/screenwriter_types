@@ -1,11 +1,13 @@
 /** Fixture factories for consumers' tests (`@sudobility/screenwriter_types/test`). */
-import type { Workspace } from '../tenancy/index.js';
+import type { ManagedEntity } from '../tenancy/index.js';
 import type { Project, DocumentMeta } from '../projects/index.js';
 import type { SnapshotSummary } from '../versions/index.js';
 
 const T = '2026-01-01T00:00:00.000Z';
 
-export function makeWorkspace(over: Partial<Workspace> = {}): Workspace {
+export function makeWorkspace(
+  over: Partial<ManagedEntity> = {}
+): ManagedEntity {
   return {
     id: 'ws_test',
     kind: 'personal',
@@ -24,7 +26,7 @@ export function makeWorkspace(over: Partial<Workspace> = {}): Workspace {
 export function makeProject(over: Partial<Project> = {}): Project {
   return {
     id: 'prj_test',
-    workspaceId: 'ws_test',
+    entityId: 'ws_test',
     name: 'Untitled Project',
     description: null,
     color: null,
@@ -48,7 +50,7 @@ export function makeDocumentMeta(
   return {
     id: 'doc_test',
     projectId: 'prj_test',
-    workspaceId: 'ws_test',
+    entityId: 'ws_test',
     folderId: null,
     kind: 'script',
     title: 'Untitled Screenplay',

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { TemplateCategory, TemplateJSON } from '@sudobility/writing_core';
 
-export type TemplateScope = 'builtin' | 'user' | 'workspace';
+export type TemplateScope = 'builtin' | 'user' | 'entity';
 
 /** `GET /templates` item (spec 05 §6.8). The full body is writing_core's Template. */
 export interface TemplateSummary {
@@ -9,7 +9,7 @@ export interface TemplateSummary {
   scope: TemplateScope;
   builtinKey: string | null;
   /** Set for `workspace` templates. */
-  workspaceId: string | null;
+  entityId: string | null;
   name: string;
   description: string | null;
   category: TemplateCategory;
@@ -24,13 +24,13 @@ export interface TemplateSummary {
   locale?: string;
 }
 
-/** `GET /templates` query: user templates always; `workspaceId` adds that workspace's; `scope` narrows.
+/** `GET /templates` query: user templates always; `entityId` adds that workspace's; `scope` narrows.
  * `locale` filters built-ins to one BCP-47 language (e.g. the app's current UI language); user/workspace templates
  * are never filtered by it, since they have no locale of their own. */
 export const templateListQuerySchema = z.object({
   category: z.string().optional(),
-  workspaceId: z.string().optional(),
-  scope: z.enum(['builtin', 'user', 'workspace']).optional(),
+  entityId: z.string().optional(),
+  scope: z.enum(['builtin', 'user', 'entity']).optional(),
   locale: z.string().optional(),
 });
 export type TemplateListQuery = z.infer<typeof templateListQuerySchema>;
@@ -52,13 +52,13 @@ const templateBody = z.custom<TemplateJSON>(
 
 export const templateCreateSchema = z
   .object({
-    scope: z.enum(['user', 'workspace']),
-    workspaceId: z.string().min(1).optional(),
+    scope: z.enum(['user', 'entity']),
+    entityId: z.string().min(1).optional(),
     template: templateBody,
   })
-  .refine((v) => v.scope !== 'workspace' || !!v.workspaceId, {
-    message: 'workspaceId is required for a workspace template',
-    path: ['workspaceId'],
+  .refine((v) => v.scope !== 'entity' || !!v.entityId, {
+    message: 'entityId is required for a workspace template',
+    path: ['entityId'],
   });
 export type TemplateCreateRequest = z.input<typeof templateCreateSchema>;
 
@@ -95,14 +95,14 @@ export const FWTEMPLATE_FORMAT_VERSION = 1;
  */
 export const templateImportSchema = z
   .object({
-    scope: z.enum(['user', 'workspace']),
-    workspaceId: z.string().min(1).optional(),
+    scope: z.enum(['user', 'entity']),
+    entityId: z.string().min(1).optional(),
     filename: z.string().min(1).max(255),
     contentB64: z.string().min(1),
   })
-  .refine((v) => v.scope !== 'workspace' || !!v.workspaceId, {
-    message: 'workspaceId is required for a workspace template',
-    path: ['workspaceId'],
+  .refine((v) => v.scope !== 'entity' || !!v.entityId, {
+    message: 'entityId is required for a workspace template',
+    path: ['entityId'],
   });
 export type TemplateImportRequest = z.input<typeof templateImportSchema>;
 

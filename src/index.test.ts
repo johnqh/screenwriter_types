@@ -27,7 +27,7 @@ import {
   workspaceDefaultsPutSchema,
   workspaceDefaultsSchema,
   workspaceDocumentsQuerySchema,
-  workspaceUpdateSchema,
+  entityUpdateSchema,
   accountDeleteSchema,
   dictionaryUpdateSchema,
   documentViewStatePutSchema,
@@ -59,8 +59,8 @@ import {
   shareLinkCreateSchema,
   shareLinkUpdateSchema,
   shareUnlockSchema,
-  workspaceCreateSchema,
-  workspaceTransferSchema,
+  entityCreateSchema,
+  entityTransferSchema,
   SYNC_CLOSE_CODES,
   SYNC_MESSAGE_TYPES,
   commandBatchRequestSchema,
@@ -401,28 +401,28 @@ describe('api keys', () => {
   it('create schema defaults ai and bounds name and expiry', () => {
     const ok = apiKeyCreateSchema.parse({
       name: 'n',
-      workspaceId: 'ws_x',
+      entityId: 'ws_x',
       scope: 'read',
     });
     expect(ok.ai).toBe(false);
     expect(
       apiKeyCreateSchema.safeParse({
         name: '',
-        workspaceId: 'ws_x',
+        entityId: 'ws_x',
         scope: 'read',
       }).success
     ).toBe(false);
     expect(
       apiKeyCreateSchema.safeParse({
         name: 'n',
-        workspaceId: 'ws_x',
+        entityId: 'ws_x',
         scope: 'admin',
       }).success
     ).toBe(false);
     expect(
       apiKeyCreateSchema.safeParse({
         name: 'n',
-        workspaceId: 'ws_x',
+        entityId: 'ws_x',
         scope: 'read',
         expiresInDays: 366,
       }).success
@@ -430,7 +430,7 @@ describe('api keys', () => {
     expect(
       apiKeyCreateSchema.safeParse({
         name: 'n',
-        workspaceId: 'ws_x',
+        entityId: 'ws_x',
         scope: 'read',
         expiresInDays: 0,
       }).success
@@ -468,12 +468,12 @@ describe('roles and permissions (spec 05 §5.2)', () => {
     expect(hasPermission('writer', 'members.invite')).toBe(false);
     expect(hasPermission('writer', 'project.purge')).toBe(false);
     expect(hasPermission('admin', 'members.invite')).toBe(true);
-    expect(hasPermission('admin', 'workspace.audit')).toBe(true);
-    expect(hasPermission('admin', 'workspace.aiToggle')).toBe(false);
-    expect(hasPermission('admin', 'workspace.delete')).toBe(false);
-    expect(hasPermission('owner', 'workspace.transfer')).toBe(true);
+    expect(hasPermission('admin', 'entity.audit')).toBe(true);
+    expect(hasPermission('admin', 'entity.aiToggle')).toBe(false);
+    expect(hasPermission('admin', 'entity.delete')).toBe(false);
+    expect(hasPermission('owner', 'entity.transfer')).toBe(true);
     expect(requiredRoleFor('document.edit')).toBe('writer');
-    expect(requiredRoleFor('workspace.aiToggle')).toBe('owner');
+    expect(requiredRoleFor('entity.aiToggle')).toBe('owner');
   });
   it('orders roles', () => {
     expect(roleAtLeast('admin', 'writer')).toBe(true);
@@ -498,20 +498,20 @@ describe('B8 routes and schemas', () => {
     );
     const appendix = [
       'GET /me/shared',
-      'POST /workspaces',
-      'PATCH /workspaces/:wid',
-      'GET /workspaces/:wid/audit.csv',
-      'DELETE /workspaces/:wid',
-      'POST /workspaces/:wid/transfer',
-      'GET /workspaces/:wid/usage',
-      'GET /workspaces/:wid/members',
-      'PATCH /workspaces/:wid/members/:uid',
-      'DELETE /workspaces/:wid/members/:uid',
-      'POST /workspaces/:wid/leave',
-      'POST /workspaces/:wid/invitations',
+      'POST /entities',
+      'PATCH /entities/:entityId',
+      'GET /entities/:entityId/audit.csv',
+      'DELETE /entities/:entityId',
+      'POST /entities/:entityId/transfer',
+      'GET /entities/:entityId/usage',
+      'GET /entities/:wid/members',
+      'PATCH /entities/:wid/members/:uid',
+      'DELETE /entities/:wid/members/:uid',
+      'POST /entities/:entityId/leave',
+      'POST /entities/:entityId/invitations',
       'POST /projects/:pid/invitations',
       'POST /documents/:did/invitations',
-      'GET /workspaces/:wid/invitations',
+      'GET /entities/:entityId/invitations',
       'GET /me/invitations',
       'POST /invitations/:iid/renew',
       'DELETE /invitations/:iid',
@@ -543,14 +543,14 @@ describe('B8 routes and schemas', () => {
     expect(have.size).toBe(Object.keys(API_ROUTES).length); // no duplicate method+path
   });
   it('validates the sharing requests', () => {
-    expect(
-      workspaceCreateSchema.safeParse({ name: 'Writers room' }).success
-    ).toBe(true);
-    expect(workspaceCreateSchema.safeParse({ name: '' }).success).toBe(false);
-    expect(
-      workspaceCreateSchema.safeParse({ name: 'x'.repeat(81) }).success
-    ).toBe(false);
-    expect(workspaceTransferSchema.safeParse({}).success).toBe(false);
+    expect(entityCreateSchema.safeParse({ name: 'Writers room' }).success).toBe(
+      true
+    );
+    expect(entityCreateSchema.safeParse({ name: '' }).success).toBe(false);
+    expect(entityCreateSchema.safeParse({ name: 'x'.repeat(81) }).success).toBe(
+      false
+    );
+    expect(entityTransferSchema.safeParse({}).success).toBe(false);
     expect(
       invitationCreateSchema.safeParse({ email: 'a@b.co', role: 'viewer' })
         .success
@@ -1155,9 +1155,9 @@ describe('B13 account and per-user data', () => {
 describe('B14 lifecycle and workspace settings', () => {
   it('registers the 27 routes with the spec paths', () => {
     const b14 = [
-      ['workspaceDocuments', 'GET', '/workspaces/:wid/documents'],
-      ['workspaceTrash', 'GET', '/workspaces/:wid/trash'],
-      ['workspaceTrashEmpty', 'POST', '/workspaces/:wid/trash/empty'],
+      ['workspaceDocuments', 'GET', '/entities/:wid/documents'],
+      ['workspaceTrash', 'GET', '/entities/:wid/trash'],
+      ['workspaceTrashEmpty', 'POST', '/entities/:wid/trash/empty'],
       ['projectPurge', 'DELETE', '/projects/:pid'],
       ['projectDuplicate', 'POST', '/projects/:pid/duplicate'],
       ['projectFolderCreate', 'POST', '/projects/:pid/folders'],
@@ -1176,12 +1176,12 @@ describe('B14 lifecycle and workspace settings', () => {
       ['projectBinList', 'GET', '/projects/:pid/bin'],
       ['projectBinCreate', 'POST', '/projects/:pid/bin'],
       ['projectBinDelete', 'DELETE', '/project-bin-items/:id'],
-      ['workspaceDefaultsGet', 'GET', '/workspaces/:wid/defaults'],
-      ['workspaceDefaultsSet', 'PUT', '/workspaces/:wid/defaults'],
-      ['workspaceContactsList', 'GET', '/workspaces/:wid/contacts'],
-      ['workspaceContactsCreate', 'POST', '/workspaces/:wid/contacts'],
-      ['workspaceContactUpdate', 'PATCH', '/workspace-contacts/:cid'],
-      ['workspaceContactDelete', 'DELETE', '/workspace-contacts/:cid'],
+      ['workspaceDefaultsGet', 'GET', '/entities/:wid/defaults'],
+      ['workspaceDefaultsSet', 'PUT', '/entities/:wid/defaults'],
+      ['workspaceContactsList', 'GET', '/entities/:wid/contacts'],
+      ['workspaceContactsCreate', 'POST', '/entities/:wid/contacts'],
+      ['workspaceContactUpdate', 'PATCH', '/entity-contacts/:cid'],
+      ['workspaceContactDelete', 'DELETE', '/entity-contacts/:cid'],
     ] as const;
     for (const [name, method, path] of b14) {
       expect(API_ROUTES[name].method, name).toBe(method);
@@ -1313,13 +1313,12 @@ describe('B14 lifecycle and workspace settings', () => {
       templateCreateSchema.safeParse({ scope: 'user', template: {} }).success
     ).toBe(true);
     expect(
-      templateCreateSchema.safeParse({ scope: 'workspace', template: {} })
-        .success
+      templateCreateSchema.safeParse({ scope: 'entity', template: {} }).success
     ).toBe(false); // needs a workspace
     expect(
       templateCreateSchema.safeParse({
-        scope: 'workspace',
-        workspaceId: 'ws_x',
+        scope: 'entity',
+        entityId: 'ws_x',
         template: {},
       }).success
     ).toBe(true);
@@ -1339,7 +1338,7 @@ describe('B14 lifecycle and workspace settings', () => {
     ).toBe(true);
     expect(
       templateImportSchema.safeParse({
-        scope: 'workspace',
+        scope: 'entity',
         filename: 'a',
         contentB64: 'AA==',
       }).success
@@ -1408,7 +1407,7 @@ describe('B14 lifecycle and workspace settings', () => {
       limit: 50,
     });
     expect(
-      workspaceUpdateSchema.safeParse({ allowPublicLinks: false }).success
+      entityUpdateSchema.safeParse({ allowPublicLinks: false }).success
     ).toBe(true);
     expect(makeWorkspace().allowPublicLinks).toBe(true);
     expect(makeProject().kind).toBe('feature');
@@ -1444,11 +1443,11 @@ describe('B16 imports, exports and watermark', () => {
       'POST /documents/:did/import-over',
       'POST /documents/:did/exports',
       'POST /documents/export-combined',
-      'POST /workspaces/:wid/watermark-lookup',
+      'POST /entities/:wid/watermark-lookup',
     ]);
     expect(API_ROUTES.watermarkLookup).toMatchObject({
       auth: 'U',
-      permission: 'workspace.audit',
+      permission: 'entity.audit',
     });
     expect(API_ROUTES.documentExportCreate.auth).toBe('U,Kr');
     expect(API_ROUTES.importCreate.auth).toBe('U,Krw');
@@ -1523,7 +1522,7 @@ describe('B16 imports, exports and watermark', () => {
     ).toBe(false);
     expect(
       importCreateSchema.safeParse({
-        templateTarget: { scope: 'workspace' },
+        templateTarget: { scope: 'entity' },
         ...file,
       }).success
     ).toBe(false);
@@ -1742,7 +1741,7 @@ describe('B11 assets and R2', () => {
         ] as const
       ).map(have)
     ).toEqual([
-      'POST /workspaces/:wid/assets/uploads',
+      'POST /entities/:wid/assets/uploads',
       'GET /assets/uploads/:uploadId',
       'POST /assets/uploads/:uploadId/parts',
       'POST /assets/uploads/:uploadId/complete',
@@ -1881,8 +1880,8 @@ describe('B11 assets and R2', () => {
     expect(
       assetLinkUpdateSchema.safeParse({ pinnedVersionId: null }).success
     ).toBe(true);
-    expect(assetListQuerySchema.parse({ workspaceId: 'ws_1' })).toMatchObject({
-      workspaceId: 'ws_1',
+    expect(assetListQuerySchema.parse({ entityId: 'ws_1' })).toMatchObject({
+      entityId: 'ws_1',
       limit: 50,
     });
     expect(assetListQuerySchema.safeParse({ linkedTo: 'nope' }).success).toBe(
@@ -1931,7 +1930,7 @@ describe('B12 collaboration, notifications, devices, email', () => {
       'PATCH /chat-messages/:mid',
       'DELETE /chat-messages/:mid',
       'GET /documents/:did/activity',
-      'GET /workspaces/:wid/activity',
+      'GET /entities/:wid/activity',
       'GET /notifications',
       'POST /notifications/read',
       'DELETE /notifications/:nid',
@@ -1948,7 +1947,7 @@ describe('B12 collaboration, notifications, devices, email', () => {
     expect(API_ROUTES.documentActivity.auth).toBe('U,Kr');
     expect(API_ROUTES.workspaceActivity).toMatchObject({
       auth: 'U',
-      permission: 'workspace.read',
+      permission: 'entity.read',
     });
     expect(API_ROUTES.documentMentionsWithoutAccess).toMatchObject({
       auth: 'U',

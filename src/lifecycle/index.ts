@@ -58,7 +58,7 @@ export type ProjectPurgeRequest = z.infer<typeof projectPurgeSchema>;
 
 export const projectDuplicateSchema = z.object({
   name: z.string().trim().min(1).max(200),
-  targetWorkspaceId: z.string().min(1).optional(),
+  targetEntityId: z.string().min(1).optional(),
   includeSnapshots: z.boolean().default(false),
   /** Re-links the source's asset links onto the copy (B11); a no-op when the target is a different workspace. */
   includeAssets: z.boolean().default(false),
@@ -122,7 +122,7 @@ export interface ApplyTemplateResult {
 
 const boolQuery = z.enum(['true', 'false']).transform((v) => v === 'true');
 
-/** `GET /workspaces/:wid/documents`: across every project; `starred` is the caller's own stars (`document_stars`). */
+/** `GET /entities/:wid/documents`: across every project; `starred` is the caller's own stars (`document_stars`). */
 export const workspaceDocumentsQuerySchema = cursorQuerySchema.extend({
   q: z.string().max(200).optional(),
   kind: documentKindSchema.optional(),
@@ -137,7 +137,7 @@ export type WorkspaceDocumentsQuery = z.output<
 export const TRASH_ITEM_TYPES = ['project', 'document', 'asset'] as const;
 export type TrashItemType = (typeof TRASH_ITEM_TYPES)[number];
 
-/** `GET /workspaces/:wid/trash`. A document trashed together with its project is not listed on its own (restore the project). */
+/** `GET /entities/:wid/trash`. A document trashed together with its project is not listed on its own (restore the project). */
 export interface TrashItem {
   type: TrashItemType;
   id: string;
@@ -156,7 +156,7 @@ export type TrashEmptyRequest = z.infer<typeof trashEmptySchema>;
 
 /** The `system.purge` job's input (also what a purge job row shows in its `requestSummary`). */
 export const purgeInputSchema = z.object({
-  workspaceId: z.string().optional(),
+  entityId: z.string().optional(),
   projectId: z.string().optional(),
   documentId: z.string().optional(),
 });
@@ -286,7 +286,7 @@ export interface WorkspaceContactDeleteResponse {
 export const projectDuplicateJobInputSchema = z.object({
   projectId: z.string().min(1),
   name: z.string().min(1),
-  targetWorkspaceId: z.string().min(1),
+  targetEntityId: z.string().min(1),
   includeSnapshots: z.boolean(),
   includeAssets: z.boolean(),
 });

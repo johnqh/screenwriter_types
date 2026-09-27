@@ -37,7 +37,7 @@ const sha256HexSchema = z
 
 /**
  * `POST /uploads/state`. `purpose` defaults to `state` (a Yjs state blob); `watermark_lookup` is a leaked file for
- * `POST /workspaces/:wid/watermark-lookup`. `import` uploads are created by `POST /imports`, never here.
+ * `POST /entities/:wid/watermark-lookup`. `import` uploads are created by `POST /imports`, never here.
  */
 export const uploadStateRequestSchema = z.object({
   sizeBytes: z.number().int().min(1),
@@ -82,12 +82,12 @@ export const importCreateSchema = z
     targetProjectId: z.string().min(1).optional(),
     templateTarget: z
       .object({
-        scope: z.enum(['user', 'workspace']),
-        workspaceId: z.string().min(1).optional(),
+        scope: z.enum(['user', 'entity']),
+        entityId: z.string().min(1).optional(),
       })
-      .refine((v) => v.scope !== 'workspace' || !!v.workspaceId, {
-        message: 'workspaceId is required for a workspace template',
-        path: ['workspaceId'],
+      .refine((v) => v.scope !== 'entity' || !!v.entityId, {
+        message: 'entityId is required for a workspace template',
+        path: ['entityId'],
       })
       .optional(),
     ...importFileFields,
