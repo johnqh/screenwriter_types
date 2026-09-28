@@ -81,7 +81,13 @@ export interface ElementRead {
   styleName: string;
   /** The style's role (`sceneHeading`, `action`, `character`, `dialogue`, ...), for callers that must not guess from names. */
   styleRole?: string;
+  /** The text as stored: what the writer typed, in the case they typed it. */
   text: string;
+  /**
+   * True when the element's style shows its text in capitals (scene headings, character cues, transitions in the
+   * screenplay templates). The editor and the printed page then show `text` upper-cased whatever case is stored.
+   */
+  allCaps?: boolean;
   contentHash: string;
 }
 

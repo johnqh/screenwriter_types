@@ -11,6 +11,13 @@ import {
   generateScriptRequestSchema,
   polishCharacterDialogueRequestSchema,
   polishSceneRequestSchema,
+  smartPasteCharactersModelSchema,
+  smartPasteCharactersRequestSchema,
+  smartPastePlotsRequestSchema,
+  smartPasteScriptModelSchema,
+  smartPasteScriptRequestSchema,
+  countWords,
+  AI_ACTION_LIMITS,
 } from '../index.js';
 
 describe('ai action types', () => {
@@ -102,5 +109,59 @@ describe('ai action types', () => {
         characters: [],
       }).success
     ).toBe(false);
+  });
+
+  it('smart paste: requests are capped in words, script lower than characters and plots', () => {
+    expect(countWords('  one two\n three  ')).toBe(3);
+    expect(countWords('   ')).toBe(0);
+    const words = (n: number) => 'w '.repeat(n);
+    expect(
+      smartPasteCharactersRequestSchema.safeParse({
+        text: 'Mara, 34, a nurse.',
+        knownNames: ['MARA'],
+      }).success
+    ).toBe(true);
+    expect(
+      smartPasteCharactersRequestSchema.safeParse({ text: ' ' }).success
+    ).toBe(false);
+    expect(
+      smartPastePlotsRequestSchema.safeParse({
+        text: words(AI_ACTION_LIMITS.pasteWordsMax),
+      }).success
+    ).toBe(true);
+    expect(
+      smartPastePlotsRequestSchema.safeParse({
+        text: words(AI_ACTION_LIMITS.pasteWordsMax + 1),
+      }).success
+    ).toBe(false);
+    expect(
+      smartPasteScriptRequestSchema.safeParse({
+        text: words(AI_ACTION_LIMITS.pasteScriptWordsMax + 1),
+      }).success
+    ).toBe(false);
+    // the script keeps its own language: no `language` field
+    expect(
+      smartPasteScriptRequestSchema.safeParse({ text: 'x', language: 'fr' })
+        .success
+    ).toBe(false);
+  });
+
+  it('smart paste: model shapes', () => {
+    expect(
+      smartPasteCharactersModelSchema.safeParse({ characters: [] }).success
+    ).toBe(true);
+    expect(
+      smartPasteCharactersModelSchema.safeParse({
+        characters: [{ name: 'Mara', aliases: [], stages: [] }],
+      }).success
+    ).toBe(false);
+    expect(
+      smartPasteScriptModelSchema.safeParse({
+        scenes: [
+          { heading: null, elements: [{ type: 'dialogue', text: 'Hi.' }] },
+          { heading: 'INT. LAB - DAY', elements: [] },
+        ],
+      }).success
+    ).toBe(true);
   });
 });

@@ -226,8 +226,20 @@ export const API_ROUTES = {
   aiGenerateScript: r('POST', '/ai/generate-script', 'U'),
   aiPolishCharacterDialogue: r('POST', '/ai/polish-character-dialogue', 'U'),
   aiPolishScene: r('POST', '/ai/polish-scene', 'U'),
+  // Smart Paste: clipboard text -> characters, plots, or a formatted script (the client applies the result).
+  aiSmartPasteCharacters: r('POST', '/ai/smart-paste-characters', 'U'),
+  aiSmartPastePlots: r('POST', '/ai/smart-paste-plots', 'U'),
+  aiSmartPasteScript: r('POST', '/ai/smart-paste-script', 'U'),
+  // A review note + the scene it is about -> alternative fixes, each a set of element edits the client applies.
+  aiSuggestNoteFix: r('POST', '/ai/suggest-note-fix', 'U'),
   aiJobCreate: r('POST', '/documents/:did/ai/jobs', 'U,Krw', 'ai.run'),
   aiJobsList: r('GET', '/documents/:did/ai/jobs', 'U,Kr', 'document.read'),
+  aiSceneSummaries: r(
+    'GET',
+    '/documents/:did/ai/scene-summaries',
+    'U,Kr',
+    'document.read'
+  ),
   aiJobGet: r('GET', '/ai/jobs/:jobId', 'U,Kr', 'document.read'),
   aiJobCancel: r('POST', '/ai/jobs/:jobId/cancel', 'U,Krw', 'ai.review'),
   aiSuggestionSetsList: r(

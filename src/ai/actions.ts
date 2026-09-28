@@ -16,6 +16,10 @@ export const AI_ACTIONS = [
   'generate-script',
   'polish-character-dialogue',
   'polish-scene',
+  'smart-paste-characters',
+  'smart-paste-plots',
+  'smart-paste-script',
+  'suggest-note-fix',
 ] as const;
 export type AiAction = (typeof AI_ACTIONS)[number];
 export const aiActionSchema = z.enum(AI_ACTIONS);
@@ -43,6 +47,30 @@ export const AI_ACTION_LIMITS = {
   locationMax: 120,
   timeMax: 40,
   idMax: 64,
+  /**
+   * Smart Paste: text taken from the clipboard. Counted in words (what the writer sees and what is priced) and in
+   * characters (a hard ceiling for the request body). The script limit is lower because its output is as long as
+   * its input.
+   */
+  pasteWordsMax: 20_000,
+  pasteCharsMax: 160_000,
+  pasteScriptWordsMax: 8_000,
+  pasteScriptCharsMax: 64_000,
+  pasteCharactersMax: 40,
+  pasteStagesMax: 8,
+  pasteAliasesMax: 10,
+  pasteKnownNamesMax: 200,
+  pasteSubplotsMax: 20,
+  plotNameMax: 120,
+  plotTextMax: 4_000,
+  pasteScenesMax: 120,
+  headingTextMax: 200,
+  /** Fixes for a review note. */
+  noteTitleMax: 200,
+  noteBodyMax: 2_000,
+  fixSuggestionsMax: 3,
+  fixEditsMax: 12,
+  fixSummaryMax: 300,
 } as const;
 
 // ---- Character skeleton (the shape `screenwriter_app`'s CharacterSkeletonEditor edits) ----
@@ -284,6 +312,209 @@ export const polishSceneModelSchema = z.strictObject({
 export const polishSceneResultSchema = polishSceneModelSchema;
 export type PolishSceneResult = z.infer<typeof polishSceneResultSchema>;
 
+// ---- Smart Paste: text from the clipboard -> characters, plots, or a formatted script ----
+
+/** Words as the limits and the prices count them: runs of non-whitespace. */
+export const countWords = (text: string): number => {
+  const t = text.trim();
+  return t ? t.split(/\s+/).length : 0;
+};
+
+const pastedText = (wordsMax: number, charsMax: number) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(charsMax)
+    .refine((t) => countWords(t) <= wordsMax, {
+      message: `Too long: at most ${wordsMax} words`,
+    });
+
+// ---- 5. smart-paste-characters ----
+
+export const smartPasteCharactersRequestSchema = z.strictObject({
+  /** The pasted text: character notes, a bible, a treatment, or a script the characters appear in. */
+  text: pastedText(
+    AI_ACTION_LIMITS.pasteWordsMax,
+    AI_ACTION_LIMITS.pasteCharsMax
+  ),
+  /** Names of the characters the document already has, so the same person comes back under the same name. */
+  knownNames: z
+    .array(z.string().trim().min(1).max(AI_ACTION_LIMITS.characterNameMax))
+    .max(AI_ACTION_LIMITS.pasteKnownNamesMax)
+    .optional(),
+  language: z.string().max(AI_ACTION_LIMITS.languageMax).optional(),
+});
+export type SmartPasteCharactersRequest = z.infer<
+  typeof smartPasteCharactersRequestSchema
+>;
+
+const pastedCharacterName = z
+  .string()
+  .min(1)
+  .max(AI_ACTION_LIMITS.characterNameMax);
+
+export const smartPasteCharactersModelSchema = z.strictObject({
+  characters: z
+    .array(
+      z.strictObject({
+        name: pastedCharacterName,
+        /** Other names the text uses for the same person (nicknames, a title, a maiden name). */
+        aliases: z
+          .array(pastedCharacterName)
+          .max(AI_ACTION_LIMITS.pasteAliasesMax),
+        /** One skeleton per age the text describes the character at; usually exactly one. Youngest first. */
+        stages: z
+          .array(characterSkeletonModelSchema)
+          .min(1)
+          .max(AI_ACTION_LIMITS.pasteStagesMax),
+      })
+    )
+    .max(AI_ACTION_LIMITS.pasteCharactersMax),
+});
+
+export const pastedCharacterSchema = z.strictObject({
+  name: pastedCharacterName,
+  aliases: z.array(pastedCharacterName).max(AI_ACTION_LIMITS.pasteAliasesMax),
+  stages: z
+    .array(characterSkeletonSchema)
+    .min(1)
+    .max(AI_ACTION_LIMITS.pasteStagesMax),
+});
+export type PastedCharacter = z.infer<typeof pastedCharacterSchema>;
+export const smartPasteCharactersResultSchema = z.strictObject({
+  /** Empty when the text describes nobody. */
+  characters: z
+    .array(pastedCharacterSchema)
+    .max(AI_ACTION_LIMITS.pasteCharactersMax),
+});
+export type SmartPasteCharactersResult = z.infer<
+  typeof smartPasteCharactersResultSchema
+>;
+
+// ---- 6. smart-paste-plots ----
+
+export const smartPastePlotsRequestSchema = z.strictObject({
+  text: pastedText(
+    AI_ACTION_LIMITS.pasteWordsMax,
+    AI_ACTION_LIMITS.pasteCharsMax
+  ),
+  language: z.string().max(AI_ACTION_LIMITS.languageMax).optional(),
+});
+export type SmartPastePlotsRequest = z.infer<
+  typeof smartPastePlotsRequestSchema
+>;
+
+export const pastedSubplotSchema = z.strictObject({
+  name: z.string().min(1).max(AI_ACTION_LIMITS.plotNameMax),
+  text: z.string().min(1).max(AI_ACTION_LIMITS.plotTextMax),
+});
+export type PastedSubplot = z.infer<typeof pastedSubplotSchema>;
+
+export const smartPastePlotsModelSchema = z.strictObject({
+  /** The main plot; null when the text has none. */
+  mainPlot: z.string().max(AI_ACTION_LIMITS.plotTextMax).nullable(),
+  subplots: z.array(pastedSubplotSchema).max(AI_ACTION_LIMITS.pasteSubplotsMax),
+});
+export const smartPastePlotsResultSchema = z.strictObject({
+  mainPlot: z.string().min(1).max(AI_ACTION_LIMITS.plotTextMax).optional(),
+  subplots: z.array(pastedSubplotSchema).max(AI_ACTION_LIMITS.pasteSubplotsMax),
+});
+export type SmartPastePlotsResult = z.infer<typeof smartPastePlotsResultSchema>;
+
+// ---- 7. smart-paste-script ----
+
+/** Formats the pasted text as a script, keeping the writer's words. The text stays in its own language. */
+export const smartPasteScriptRequestSchema = z.strictObject({
+  text: pastedText(
+    AI_ACTION_LIMITS.pasteScriptWordsMax,
+    AI_ACTION_LIMITS.pasteScriptCharsMax
+  ),
+});
+export type SmartPasteScriptRequest = z.infer<
+  typeof smartPasteScriptRequestSchema
+>;
+
+export const pastedSceneSchema = z.strictObject({
+  /**
+   * The scene heading as the writer wrote it ("INT. LAB - DAY"). Null only for text that comes before the first
+   * heading (a paste that starts in the middle of a scene).
+   */
+  heading: z.string().min(1).max(AI_ACTION_LIMITS.headingTextMax).nullable(),
+  elements: z
+    .array(scriptElementSchema)
+    .max(AI_ACTION_LIMITS.elementsPerSceneMax),
+});
+export type PastedScene = z.infer<typeof pastedSceneSchema>;
+
+export const smartPasteScriptModelSchema = z.strictObject({
+  scenes: z
+    .array(pastedSceneSchema)
+    .min(1)
+    .max(AI_ACTION_LIMITS.pasteScenesMax),
+});
+export const smartPasteScriptResultSchema = smartPasteScriptModelSchema;
+export type SmartPasteScriptResult = z.infer<
+  typeof smartPasteScriptResultSchema
+>;
+
+// ---- 8. suggest-note-fix ----
+
+/** One element of the scene a note is about, with the caller's id so an edit can name it. */
+export const fixSceneElementSchema = z.strictObject({
+  id: z.string().min(1).max(AI_ACTION_LIMITS.idMax),
+  type: z.enum(SCRIPT_ELEMENT_TYPES),
+  text: z.string().min(1).max(AI_ACTION_LIMITS.sceneElementTextMax),
+});
+export type FixSceneElement = z.infer<typeof fixSceneElementSchema>;
+
+export const suggestNoteFixRequestSchema = z.strictObject({
+  /** The review note to act on, as the review gave it. */
+  note: z.strictObject({
+    title: z.string().trim().min(1).max(AI_ACTION_LIMITS.noteTitleMax),
+    body: z.string().trim().min(1).max(AI_ACTION_LIMITS.noteBodyMax),
+    category: z.string().max(40).optional(),
+  }),
+  scene: z.strictObject({
+    heading: z.string().max(AI_ACTION_LIMITS.headingTextMax).optional(),
+    elements: z
+      .array(fixSceneElementSchema)
+      .min(1)
+      .max(AI_ACTION_LIMITS.sceneElementsMax),
+  }),
+  /** Ids of the elements the note points at, when it points at particular ones. */
+  focusIds: z
+    .array(z.string().min(1).max(AI_ACTION_LIMITS.idMax))
+    .max(AI_ACTION_LIMITS.sceneElementsMax)
+    .optional(),
+  language: z.string().max(AI_ACTION_LIMITS.languageMax).optional(),
+});
+export type SuggestNoteFixRequest = z.infer<typeof suggestNoteFixRequestSchema>;
+
+export const noteFixEditSchema = z.strictObject({
+  /** The id of an element that was sent. */
+  id: z.string().min(1).max(AI_ACTION_LIMITS.idMax),
+  /** The element's new text; null removes the element. */
+  text: z.string().max(AI_ACTION_LIMITS.sceneElementTextMax).nullable(),
+});
+export type NoteFixEdit = z.infer<typeof noteFixEditSchema>;
+
+export const noteFixSuggestionSchema = z.strictObject({
+  /** What this fix does, in one or two sentences, for the writer choosing between fixes. */
+  summary: z.string().min(1).max(AI_ACTION_LIMITS.fixSummaryMax),
+  edits: z.array(noteFixEditSchema).min(1).max(AI_ACTION_LIMITS.fixEditsMax),
+});
+export type NoteFixSuggestion = z.infer<typeof noteFixSuggestionSchema>;
+
+export const suggestNoteFixModelSchema = z.strictObject({
+  /** Different ways to fix the note, best first. Empty when the note cannot be fixed by editing this scene's text. */
+  suggestions: z
+    .array(noteFixSuggestionSchema)
+    .max(AI_ACTION_LIMITS.fixSuggestionsMax),
+});
+export const suggestNoteFixResultSchema = suggestNoteFixModelSchema;
+export type SuggestNoteFixResult = z.infer<typeof suggestNoteFixResultSchema>;
+
 // ---- Registry ----
 
 /** Action -> schema of what the model returns (stored on the ShapeShyft endpoint). */
@@ -292,6 +523,10 @@ export const AI_ACTION_MODEL_SCHEMAS = {
   'generate-script': generateScriptModelSchema,
   'polish-character-dialogue': polishCharacterDialogueModelSchema,
   'polish-scene': polishSceneModelSchema,
+  'smart-paste-characters': smartPasteCharactersModelSchema,
+  'smart-paste-plots': smartPastePlotsModelSchema,
+  'smart-paste-script': smartPasteScriptModelSchema,
+  'suggest-note-fix': suggestNoteFixModelSchema,
 } as const satisfies Record<AiAction, z.ZodType>;
 
 /** Action -> schema of the request body the client sends. */
@@ -300,6 +535,10 @@ export const AI_ACTION_REQUEST_SCHEMAS = {
   'generate-script': generateScriptRequestSchema,
   'polish-character-dialogue': polishCharacterDialogueRequestSchema,
   'polish-scene': polishSceneRequestSchema,
+  'smart-paste-characters': smartPasteCharactersRequestSchema,
+  'smart-paste-plots': smartPastePlotsRequestSchema,
+  'smart-paste-script': smartPasteScriptRequestSchema,
+  'suggest-note-fix': suggestNoteFixRequestSchema,
 } as const satisfies Record<AiAction, z.ZodType>;
 
 /** What `POST /ai/{action}` returns in `data`: the normalised result plus what the call cost. */

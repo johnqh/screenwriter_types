@@ -122,6 +122,8 @@ const ERROR_TABLE = [
   ['QUOTE_EXCEEDS_MAX', 402],
   ['AI_CONTENT_REFUSED', 422],
   ['SCOPE_TOO_LARGE', 413],
+  // A scene cannot be reviewed on its own while a scene before it has no summary to stand in for it.
+  ['SCENE_SUMMARIES_MISSING', 409],
   ['SUGGESTION_UNAVAILABLE', 409],
   ['JOB_KIND_DISABLED', 501],
   ['JOB_KIND_NOT_GENERIC', 400],

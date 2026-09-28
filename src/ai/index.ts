@@ -174,6 +174,24 @@ export interface CoverageReport {
   weaknesses: AiNote[];
   notesByScene: { sceneId: string; heading: string; notes: AiNote[] }[];
   stats: { scenes: number; chunks: number; droppedItems: number };
+  /** What was reviewed. Absent on reports made before scopes existed: the complete script. */
+  scope?:
+    { kind: 'script' } | { kind: 'scene'; sceneId: string; heading: string };
+}
+
+/** `GET /documents/:did/ai/scene-summaries`: which scenes have a summary that can stand in for them in a review. */
+export interface SceneSummaryStatus {
+  sceneId: string;
+  number: string | null;
+  heading: string;
+  /** Where the summary comes from; null when the scene has none. */
+  source: 'review' | 'synopsis' | null;
+  /** False when the scene changed since it was summarised: usable, but a complete review would refresh it. */
+  current: boolean;
+  summary: string | null;
+}
+export interface SceneSummariesResponse {
+  scenes: SceneSummaryStatus[];
 }
 
 export interface AiTokenUsage {
@@ -188,6 +206,12 @@ export interface AiTokenUsage {
 export const aiScopeSchema = z.object({
   sceneIds: z.array(z.string().min(1)).max(200).optional(),
   elementIds: z.array(z.string().min(1)).max(2000).optional(),
+  /**
+   * `coverage` only, with exactly one scene in `sceneIds`: review that scene as it stands in the story so far. The
+   * AI gets the scene in full and every scene BEFORE it as its stored summary (not the scenes after it). Refused
+   * with `SCENE_SUMMARIES_MISSING` while a scene before it has no summary.
+   */
+  storySoFar: z.boolean().optional(),
 });
 export type AiScope = z.infer<typeof aiScopeSchema>;
 
@@ -360,6 +384,7 @@ export const aiEstimateRequestSchema = z.object({
     .object({
       sceneIds: z.array(z.string()).optional(),
       elementIds: z.array(z.string()).optional(),
+      storySoFar: z.boolean().optional(),
     })
     .optional(),
   options: z.record(z.string(), z.unknown()).optional(),
